@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FakeOS - Rizesky Portfolio</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    
+    <!-- NES.css for retro styling -->
+    <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet">
+    
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="terminal.css">
+    <link rel="stylesheet" href="components.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <canvas id="bg-animation"></canvas>
+    
+          <!-- Desktop Icons -->
+          <div class="desktop-icons">
+              <div class="icon">
+                  <div class="icon-image">👨‍💻</div>
+                  <div class="icon-label">Profile</div>
+              </div>
+              <div class="icon">
+                  <div class="icon-image">🖥️</div>
+                  <div class="icon-label">Terminal</div>
+              </div>
+              <div class="icon">
+                  <div class="icon-image">📂</div>
+                  <div class="icon-label">Projects</div>
+              </div>
+              <div class="icon">
+                  <div class="icon-image">📄</div>
+                  <div class="icon-label">Resume</div>
+              </div>
+          </div>
+    
+    <!-- Terminal Window -->
+    <div id="terminal-window" class="terminal-window nes-container is-dark is-rounded">
+        <div class="terminal-header">
+            <div class="terminal-buttons">
+                <button class="nes-btn is-error" id="close-btn" aria-label="Close terminal"></button>
+                <button class="nes-btn is-warning" id="minimize-btn" aria-label="Minimize terminal"></button>
+                <button class="nes-btn is-success" id="maximize-btn" aria-label="Maximize terminal"></button>
+            </div>
+            <div class="terminal-title">Terminal</div>
+        </div>
+        
+        <div class="terminal-body">
+            <div id="terminal-output" class="terminal-output"></div>
+        </div>
+    </div>
+    
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <div class="taskbar-start">FakeOS</div>
+        <div class="taskbar-apps">
+            <div class="taskbar-terminal-group">
+                <div id="terminal-taskbar-btn" class="taskbar-app active">Terminal</div>
+                <div id="close-terminal-btn" class="taskbar-app close-btn">✕</div>
+            </div>
+        </div>
+        <div id="taskbar-time" class="taskbar-time">00/00/0000 00:00</div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="filesystem.js"></script>
+    <script src="commands.js"></script>
+    <script src="terminal.js"></script>
+    <script src="background.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

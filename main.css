@@ -1,0 +1,191 @@
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #1a1a2e;
+  color: #fff;
+  font-family: 'Press Start 2P', cursive;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+/* Desktop Icons */
+.desktop-icons {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1;
+}
+
+.icon {
+  margin-bottom: 30px;
+  text-align: center;
+  cursor: pointer;
+  width: 80px;
+}
+
+  .icon-image {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #9d4edd, #7c3aed);
+    margin: 0 auto 8px;
+    border: 2px solid #9d4edd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
+  }
+
+.icon-label {
+  color: #fff;
+  font-size: 0.5rem;
+  text-shadow: 1px 1px 2px #000;
+}
+
+/* Terminal Window */
+.terminal-window {
+  width: 95vw;
+  max-width: 1200px;
+  min-width: 600px;
+  height: 60vh;
+  min-height: 400px;
+  position: absolute;
+  z-index: 100;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 
+    0 0 20px rgba(168, 85, 247, 0.2),
+    0 0 40px rgba(139, 92, 246, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  resize: both;
+  overflow: hidden;
+}
+
+/* Taskbar */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: #2a2a4e;
+  border-top: 2px solid #9d4edd;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  z-index: 2;
+}
+
+.taskbar-start {
+  padding: 5px 15px;
+  background: linear-gradient(135deg, #9d4edd, #7c3aed);
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid #9d4edd;
+  box-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
+}
+
+.taskbar-start:hover {
+  background: #9333ea;
+}
+
+.taskbar-apps {
+  display: flex;
+  gap: 5px;
+  margin-left: 10px;
+}
+
+.taskbar-app {
+  padding: 5px 10px;
+  background: #1a1a2e;
+  border: 1px solid #9d4edd;
+  font-size: 0.6rem;
+  color: #9d4edd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+}
+
+.taskbar-app:hover {
+  background: #9333ea;
+  color: #000;
+}
+
+.taskbar-app.active {
+  background: #9d4edd;
+  color: #000;
+}
+
+.taskbar-app.close-btn {
+  background: #dc2626;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.taskbar-app.close-btn:hover {
+  background: #ef4444;
+}
+
+.taskbar-app.active:hover {
+  background: #9333ea;
+}
+
+/* Terminal group - merged component */
+.taskbar-terminal-group {
+  display: flex;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.taskbar-terminal-group .taskbar-app {
+  border-radius: 0;
+  margin: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.taskbar-terminal-group .taskbar-app:last-child {
+  border-right: none;
+}
+
+.taskbar-terminal-group .taskbar-app.active {
+  background: #9d4edd;
+  color: #000;
+}
+
+.taskbar-terminal-group .taskbar-app.close-btn {
+  background: #dc2626;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.taskbar-terminal-group .taskbar-app.close-btn:hover {
+  background: #ef4444;
+}
+
+.taskbar-time {
+  margin-left: auto;
+  font-size: 0.6rem;
+  color: #9d4edd;
+}
