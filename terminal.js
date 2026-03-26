@@ -55,7 +55,7 @@ class PortoOSTerminal {
           // Show welcome message and prompt after boot sequence
           this.showWelcome();
         }
-      }, index * 500);
+      }, index * 350);
     });
   }
 
@@ -91,7 +91,10 @@ class PortoOSTerminal {
     if (!this.outputElement) return;
     
     const line = document.createElement('div');
-    line.className = `terminal-line ${className}`;
+    const classes = ['terminal-line'];
+    if (className) classes.push(className);
+    if (this.isAsciiArtText(text)) classes.push('ascii-art');
+    line.className = classes.join(' ');
     line.textContent = text;
     this.outputElement.appendChild(line);
     this.outputElement.scrollTop = this.outputElement.scrollHeight;
@@ -609,5 +612,12 @@ class PortoOSTerminal {
 
     // Start typing after a short delay
     setTimeout(typeNextChar, 500);
+  }
+
+  isAsciiArtText(text) {
+    if (!text || typeof text !== 'string') return false;
+    const artCharacters = /[█▓▒░╔╗╚╝═║╦╩╬╣╠╚╔╩╦╬┌┐└┘─│╭╮╰╯]/;
+    const hasMultipleLines = text.includes('\n');
+    return hasMultipleLines && artCharacters.test(text);
   }
 }
