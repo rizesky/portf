@@ -1,7 +1,7 @@
-class FakeOSTerminal {
+class PortoOSTerminal {
   constructor() {
-    this.filesystem = new FakeOSFileSystem();
-    this.commandProcessor = new FakeOSCommandProcessor(this.filesystem);
+    this.filesystem = new PortoOSFileSystem();
+    this.commandProcessor = new PortoOSCommandProcessor(this.filesystem);
     this.currentLine = '';
     this.history = [];
     this.historyIndex = -1;
@@ -38,9 +38,9 @@ class FakeOSTerminal {
 
   showBootSequence() {
     const bootMessages = [
-      'FakeOS v1.0.0 - Totally Real',
+      'PortoOS v1.0.0 - My terminal portfolio',
       '===========================',
-      'Loading fake modules...',
+      'Loading portoOS modules...',
       'Mounting imaginary drives...',
       'Starting pretend services...',
       'Initializing terminal emulator...',
@@ -60,7 +60,7 @@ class FakeOSTerminal {
   }
 
   showWelcome() {
-    this.addOutput('Welcome to FakeOS!');
+    this.addOutput('Welcome to PortoOS!');
     this.addOutput('');
     this.addOutput('This is Rizesky\'s Interactive Portfolio Terminal.');
     this.addOutput('Explore my work using terminal commands like \'ls\', \'cd\', \'cat\', and \'tree\'.');
@@ -107,7 +107,7 @@ class FakeOSTerminal {
     
     const prompt = document.createElement('div');
     prompt.className = 'terminal-prompt';
-      prompt.innerHTML = `<span class="user">visitor@fakeos</span>:<span class="path">${this.filesystem.pwd()}</span>$ `;
+      prompt.innerHTML = `<span class="user">visitor@portoos</span>:<span class="path">${this.filesystem.pwd()}</span>$ `;
     
     // Move existing input to new prompt
     if (this.inputElement && this.inputElement.parentNode) {
@@ -211,35 +211,119 @@ class FakeOSTerminal {
   }
 
   autocomplete() {
-    const currentInput = this.currentLine.toLowerCase().trim();
+    if (!this.inputElement) return;
     
-    // Get available commands and file system items
+    const rawInput = this.inputElement.value || '';
+    
+    if (this.tryCatAutocomplete(rawInput)) {
+      return;
+    }
+    
+    this.handleGeneralAutocomplete(rawInput);
+  }
+  
+  tryCatAutocomplete(rawInput) {
+    const trimmedInput = rawInput.trim();
+    
+    if (!trimmedInput.toLowerCase().startsWith('cat ')) {
+      return false;
+    }
+    
+    const partialPath = trimmedInput.slice(4);
+    const completions = this.getPathCompletions(partialPath);
+    
+    if (completions.length === 0) {
+      return true;
+    }
+    
+    if (completions.length === 1) {
+      const newValue = `cat ${completions[0]}`;
+      this.inputElement.value = newValue;
+      this.currentLine = newValue;
+    } else {
+      const displayMatches = completions.slice(0, 5);
+      this.addOutput(`Possible completions: ${displayMatches.join(' ')}${completions.length > 5 ? '...' : ''}`);
+    }
+    
+    return true;
+  }
+  
+  handleGeneralAutocomplete(rawInput) {
+    const currentInput = rawInput.toLowerCase().trim();
+    
+    if (!currentInput) {
+      return;
+    }
+    
     const commands = ['ls', 'cd', 'cat', 'pwd', 'whoami', 'date', 'ps', 'uname', 'echo', 'clear', 'help', 'warnings', 'tree'];
-    const aliases = ['about', 'skills', 'projects', 'contact', 'experience', 'education', '..'];
-    
-    // Get current directory contents
+    const aliases = ['about', 'skills', 'projects', 'contact', 'experience', 'experiences', 'education', '..'];
     const currentDir = this.filesystem.ls();
     const files = currentDir.files || [];
-    
-    // Combine all possible completions
     const allOptions = [...commands, ...aliases, ...files];
     
     const matches = allOptions.filter(option => 
       option.toLowerCase().startsWith(currentInput) && option.toLowerCase() !== currentInput
     );
-    
-    // Remove duplicates by converting to Set and back to array
     const uniqueMatches = [...new Set(matches)];
     
     if (uniqueMatches.length === 1) {
-      // Single match - complete it
       this.currentLine = uniqueMatches[0];
       this.inputElement.value = this.currentLine;
     } else if (uniqueMatches.length > 1) {
-      // Multiple matches - show first few
       const displayMatches = uniqueMatches.slice(0, 5);
       this.addOutput(`Possible completions: ${displayMatches.join(' ')}${uniqueMatches.length > 5 ? '...' : ''}`);
     }
+  }
+  
+  getPathCompletions(partialPath) {
+    const path = partialPath || '';
+    const lastSlashIndex = path.lastIndexOf('/');
+    let dirPart = '';
+    let filePrefix = path;
+    
+    if (lastSlashIndex === 0) {
+      dirPart = '/';
+      filePrefix = path.slice(1);
+    } else if (lastSlashIndex > 0) {
+      dirPart = path.slice(0, lastSlashIndex);
+      filePrefix = path.slice(lastSlashIndex + 1);
+    }
+    
+    const listing = dirPart ? this.filesystem.ls(dirPart) : this.filesystem.ls();
+    if (listing.error) {
+      return [];
+    }
+    
+    const options = listing.files || [];
+    const lowerPrefix = filePrefix.toLowerCase();
+    
+    const matches = options.filter(option => 
+      option.toLowerCase().startsWith(lowerPrefix) && option.toLowerCase() !== lowerPrefix
+    );
+    
+    const uniqueMatches = [...new Set(matches)];
+    
+    return uniqueMatches.map(option => this.buildCompletionPath(dirPart, option));
+  }
+  
+  buildCompletionPath(dirPart, entry) {
+    const base = dirPart ? (dirPart === '/' ? '/' : dirPart) : '';
+    const separator = base && base !== '/' ? '/' : '';
+    const candidate = base ? `${base}${separator}${entry}` : entry;
+    const resolvedCandidate = this.resolveCandidatePath(base, entry);
+    const node = resolvedCandidate ? this.filesystem.getNode(resolvedCandidate) : null;
+    const suffix = node && node.type === 'directory' ? '/' : '';
+    return candidate + suffix;
+  }
+  
+  resolveCandidatePath(base, entry) {
+    if (!base) {
+      return this.filesystem.resolvePath(entry);
+    }
+    
+    const separator = base === '/' ? '' : '/';
+    const candidatePath = `${base}${separator}${entry}`;
+    return this.filesystem.resolvePath(candidatePath);
   }
 
   clearTerminal() {
@@ -272,14 +356,14 @@ class FakeOSTerminal {
 
   startSystemAdminDestruction() {
     const adminCommands = [
-      { cmd: 'admin@fakeos:~# whoami', output: 'admin', isRoot: false },
-      { cmd: 'admin@fakeos:~# sudo su -', output: 'root@fakeos:~#', isRoot: true },
-      { cmd: 'root@fakeos:~# systemctl stop terminal.service && ps aux | grep visitor', output: 'Terminal service stopped.\nvisitor    1234  0.1  0.0  12345  6789 pts/0    S+   12:34   0:00 bash', isRoot: true },
-      { cmd: 'root@fakeos:~# kill -9 1234 && rm -rf /home/visitor', output: 'Process terminated.\nDirectory removed.', isRoot: true },
-      { cmd: 'root@fakeos:~# rm -rf /var/log/visitor && rm -rf /tmp/visitor*', output: 'Logs purged.\nTemporary files cleared.', isRoot: true },
-      { cmd: 'root@fakeos:~# userdel -r visitor && systemctl disable terminal.service', output: 'User account deleted.\nTerminal service disabled.', isRoot: true },
-      { cmd: 'root@fakeos:~# iptables -A INPUT -s 0.0.0.0/0 -j DROP && shutdown -h now', output: 'Firewall rules updated.\nSystem shutting down...', isRoot: true },
-      { cmd: 'root@fakeos:~# ', output: '', isRoot: true }
+      { cmd: 'admin@portoos:~# whoami', output: 'admin', isRoot: false },
+      { cmd: 'admin@portoos:~# sudo su -', output: 'root@portoos:~#', isRoot: true },
+      { cmd: 'root@portoos:~# systemctl stop terminal.service && ps aux | grep visitor', output: 'Terminal service stopped.\nvisitor    1234  0.1  0.0  12345  6789 pts/0    S+   12:34   0:00 bash', isRoot: true },
+      { cmd: 'root@portoos:~# kill -9 1234 && rm -rf /home/visitor', output: 'Process terminated.\nDirectory removed.', isRoot: true },
+      { cmd: 'root@portoos:~# rm -rf /var/log/visitor && rm -rf /tmp/visitor*', output: 'Logs purged.\nTemporary files cleared.', isRoot: true },
+      { cmd: 'root@portoos:~# userdel -r visitor && systemctl disable terminal.service', output: 'User account deleted.\nTerminal service disabled.', isRoot: true },
+      { cmd: 'root@portoos:~# iptables -A INPUT -s 0.0.0.0/0 -j DROP && shutdown -h now', output: 'Firewall rules updated.\nSystem shutting down...', isRoot: true },
+      { cmd: 'root@portoos:~# ', output: '', isRoot: true }
     ];
 
     let commandIndex = 0;

@@ -1,4 +1,4 @@
-class FakeOSFileSystem {
+class PortoOSFileSystem {
   constructor() {
     this.currentPath = '/home/visitor';
     this.illegalActions = 0;
@@ -13,15 +13,24 @@ class FakeOSFileSystem {
               'experience.txt': {
                 type: 'file',
                 content: `Software Engineer | Mar 2023 - Mar 2025
-• Enhanced server uploader and config promoter, reducing deployment errors and improving uptime by 25%
-• Designed and maintained analytics pipelines for collecting, processing, and exporting in-game data
-• Provided actionable insights on player engagement, matchmaking, and monetization
-• Optimized data collection and reporting, improving system reliability and game performance visibility
+• Designed and developed backend services for large-scale multiplayer gaming platforms, supporting real-time, high
+  concurrency workloads.
+• Designed and improved platform services for server upload and configuration promotion, enabling clients to manage game
+  server environments reliably and reducing deployment errors by 25%.
+• Resolved critical production issues, such as deployment overshoot and core dump failures, improving system stability and
+  observability. Resulting in much better client satisfaction.
+• Designed and implemented event-driven systems using Kafka and also other cheaper pubsub/queue tool to support scalable,
+  asynchronous communication across distributed services, improving system resilience and decoupling.
+• Developed data intelligence services to support game analytics and player data processing, integrating with AWS Data
+  Kinesis, and Fivetran and other vendor as per client requests.
+• Operated distributed game multiplayer platform systems across multi-cloud environments including Amazon Web Services,
+  Google Cloud, and Microsoft Azure using Kubernetes and Nomad.
 
 Software Engineer Backend | Oct 2022 - Mar 2023
-• Developed and maintained backend services for credit, loan, auditing, and collection systems
-• Refactored legacy loan processing code, improving performance by 15% and easier to maintain
-• Evaluated and recommended technology stacks for new services, improving maintainability and deployment efficiency
+•Designed and optimized backend services for a user-facing loan system, improving processing performance by 15% and
+ enabling more successful loan applications.
+•Developed and updated internal auditing services to improve financial transparency and strengthen risk control. 
+•Maintained backend systems for credit and loan services, ensuring reliability in financial operations.
 
 Software Engineer Backend | Oct 2021 - Oct 2022
 • Developed and maintained collection and recovery backend systems
@@ -330,8 +339,8 @@ GitHub: github.com/rizesky`
                 },
           '.bashrc': {
             type: 'file',
-            content: `# FakeOS .bashrc
-export PS1="visitor@fakeos:\\w\\$ "
+            content: `# PortoOS .bashrc
+export PS1="visitor@portoos:\\w\\$ "
 export EDITOR=nano
 export BROWSER=firefox
 alias ll='ls -la'
@@ -343,8 +352,8 @@ alias contact='cat contact/email.txt'`
           },
           '.profile': {
             type: 'file',
-            content: `# FakeOS .profile
-echo "Welcome to FakeOS v1.0.0 - Portfolio Edition"
+            content: `# PortoOS .profile
+echo "Welcome to PortoOS v1.0.0 - Portfolio Edition"
 echo "Type 'help' for available commands"`
           },
         }

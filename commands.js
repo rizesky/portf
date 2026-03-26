@@ -1,4 +1,4 @@
-class FakeOSCommandProcessor {
+class PortoOSCommandProcessor {
   constructor(filesystem) {
     this.filesystem = filesystem;
           this.aliases = {
@@ -8,6 +8,7 @@ class FakeOSCommandProcessor {
             'projects': 'tree projects/',
             'contact': 'cat contact/email.txt',
             'experience': 'cat about/experience.txt',
+            'experiences': 'cat about/experience.txt',
             'education': 'cat about/education.txt',
             'profile': 'cat profile.txt'
           };
@@ -51,7 +52,7 @@ class FakeOSCommandProcessor {
       case 'help':
         return this.handleHelp();
       case 'uname':
-        return { output: 'FakeOS 1.0.0 x86_64 GNU/Linux' };
+        return { output: 'PortoOS 1.0.0 x86_64 GNU/Linux' };
       case 'echo':
         return { output: args.join(' ') };
       case 'warnings':
@@ -99,7 +100,7 @@ class FakeOSCommandProcessor {
 
   handleHelp() {
     return {
-      output: `FakeOS v1.0.0 - Totally Real
+      output: `PortoOS v1.0.0 - My terminal portfolio
 Available commands:
 
 File System:
@@ -130,6 +131,9 @@ Aliases:
   skills             cat about/skills.txt
   projects           tree projects/
   contact            cat contact/email.txt
+  experience         cat about/experience.txt
+  experiences        cat about/experience.txt
+  education          cat about/education.txt
   profile            cat profile.txt
 
 Type any command to get started!`

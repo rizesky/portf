@@ -1,4 +1,4 @@
-class FakeOSApp {
+class PortoOSApp {
   constructor() {
     this.terminalElement = document.getElementById('terminal-window');
     this.isTerminalMinimized = false;
@@ -10,13 +10,13 @@ class FakeOSApp {
   }
 
   init() {
-    console.log('FakeOS App initializing...');
+    console.log('PortoOS App initializing...');
     
     // Initialize background animation
     this.background = new BackgroundAnimation();
     
     // Initialize terminal
-    this.terminal = new FakeOSTerminal();
+    this.terminal = new PortoOSTerminal();
     window.terminalInstance = this.terminal;
     
     // Set up window dragging
@@ -28,7 +28,7 @@ class FakeOSApp {
     // Set up clock
     this.setupClock();
     
-    console.log('FakeOS App initialized!');
+    console.log('PortoOS App initialized!');
   }
 
   setupWindowDragging() {
@@ -201,5 +201,5 @@ class FakeOSApp {
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new FakeOSApp();
+  new PortoOSApp();
 });
