@@ -223,13 +223,13 @@ class PortoOSTerminal {
   }
   
   tryCatAutocomplete(rawInput) {
-    const trimmedInput = rawInput.trim();
+    const input = rawInput.trimStart();
     
-    if (!trimmedInput.toLowerCase().startsWith('cat ')) {
+    if (!input.toLowerCase().startsWith('cat ')) {
       return false;
     }
     
-    const partialPath = trimmedInput.slice(4);
+    const partialPath = input.slice(4).trimStart();
     const completions = this.getPathCompletions(partialPath);
     
     if (completions.length === 0) {
@@ -249,29 +249,73 @@ class PortoOSTerminal {
   }
   
   handleGeneralAutocomplete(rawInput) {
-    const currentInput = rawInput.toLowerCase().trim();
-    
-    if (!currentInput) {
-      return;
-    }
+    if (!this.inputElement) return;
     
     const commands = ['ls', 'cd', 'cat', 'pwd', 'whoami', 'date', 'ps', 'uname', 'echo', 'clear', 'help', 'warnings', 'tree'];
     const aliases = ['about', 'skills', 'projects', 'contact', 'experience', 'experiences', 'education', '..'];
-    const currentDir = this.filesystem.ls();
-    const files = currentDir.files || [];
-    const allOptions = [...commands, ...aliases, ...files];
+    const trimmedLeading = rawInput.replace(/^\s+/, '');
+    const hasTrailingSpace = rawInput.endsWith(' ');
     
-    const matches = allOptions.filter(option => 
-      option.toLowerCase().startsWith(currentInput) && option.toLowerCase() !== currentInput
-    );
+    if (!trimmedLeading) {
+      this.showCompletionOptions([...commands, ...aliases]);
+      return;
+    }
+    
+    const tokens = trimmedLeading.split(/\s+/);
+    const isCommandContext = tokens.length === 1 && !hasTrailingSpace;
+    
+    if (isCommandContext) {
+      const partial = tokens[0];
+      const preservedPrefix = rawInput.slice(0, rawInput.length - partial.length);
+      this.completeFromOptions([...commands, ...aliases], preservedPrefix, partial);
+      return;
+    }
+    
+    const partialPath = hasTrailingSpace ? '' : tokens[tokens.length - 1];
+    const baseInput = rawInput.slice(0, rawInput.length - partialPath.length);
+    this.completePathContext(baseInput, partialPath);
+  }
+  
+  showCompletionOptions(options) {
+    if (!options.length) return;
+    const uniqueOptions = [...new Set(options)];
+    const displayMatches = uniqueOptions.slice(0, 5);
+    this.addOutput(`Possible completions: ${displayMatches.join(' ')}${uniqueOptions.length > 5 ? '...' : ''}`);
+  }
+  
+  completeFromOptions(options, baseInput, partial) {
+    const normalizedPartial = partial.toLowerCase();
+    let matches;
+    
+    if (!normalizedPartial) {
+      matches = options;
+    } else {
+      matches = options.filter(option => {
+        const lower = option.toLowerCase();
+        return lower.startsWith(normalizedPartial) && lower !== normalizedPartial;
+      });
+    }
+    
     const uniqueMatches = [...new Set(matches)];
     
-    if (uniqueMatches.length === 1) {
-      this.currentLine = uniqueMatches[0];
-      this.inputElement.value = this.currentLine;
-    } else if (uniqueMatches.length > 1) {
-      const displayMatches = uniqueMatches.slice(0, 5);
-      this.addOutput(`Possible completions: ${displayMatches.join(' ')}${uniqueMatches.length > 5 ? '...' : ''}`);
+    if (normalizedPartial && uniqueMatches.length === 1) {
+      const newValue = `${baseInput}${uniqueMatches[0]}`;
+      this.inputElement.value = newValue;
+      this.currentLine = newValue;
+    } else if (uniqueMatches.length > 0) {
+      this.showCompletionOptions(uniqueMatches);
+    }
+  }
+  
+  completePathContext(baseInput, partialPath) {
+    const completions = this.getPathCompletions(partialPath);
+    
+    if (completions.length === 1) {
+      const newValue = `${baseInput}${completions[0]}`;
+      this.inputElement.value = newValue;
+      this.currentLine = newValue;
+    } else if (completions.length > 1) {
+      this.showCompletionOptions(completions);
     }
   }
   
