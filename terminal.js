@@ -2,8 +2,9 @@ class PortoOSTerminal {
   constructor() {
     this.filesystem = new PortoOSFileSystem();
     this.commandProcessor = new PortoOSCommandProcessor(this.filesystem);
+    this.commandProcessor.terminal = this;
     this.currentLine = '';
-    this.history = [];
+    this.history = this.loadHistory();
     this.historyIndex = -1;
     this.isInitialized = false;
     
@@ -44,18 +45,41 @@ class PortoOSTerminal {
       'Mounting imaginary drives...',
       'Starting pretend services...',
       'Initializing terminal emulator...',
-      'System ready!'
+      'System ready!',
+      '',
+      '(press any key to skip)'
     ];
 
+    this.bootSkipped = false;
+    this.bootTimers = [];
+
+    const skip = () => {
+      if (this.bootSkipped) return;
+      this.bootSkipped = true;
+      this.bootTimers.forEach(t => clearTimeout(t));
+      this.bootTimers = [];
+      document.removeEventListener('keydown', skip);
+      document.removeEventListener('click', skip);
+      this.clearTerminal();
+      bootMessages.slice(0, -2).forEach(m => this.addOutput(m));
+      this.addOutput('');
+      this.showWelcome();
+    };
+    document.addEventListener('keydown', skip);
+    document.addEventListener('click', skip);
+
     bootMessages.forEach((message, index) => {
-      setTimeout(() => {
+      const t = setTimeout(() => {
+        if (this.bootSkipped) return;
         this.addOutput(message);
         if (index === bootMessages.length - 1) {
+          document.removeEventListener('keydown', skip);
+          document.removeEventListener('click', skip);
           this.addOutput('');
-          // Show welcome message and prompt after boot sequence
           this.showWelcome();
         }
       }, index * 350);
+      this.bootTimers.push(t);
     });
   }
 
@@ -89,15 +113,44 @@ class PortoOSTerminal {
 
   addOutput(text, className = '') {
     if (!this.outputElement) return;
-    
+
     const line = document.createElement('div');
     const classes = ['terminal-line'];
     if (className) classes.push(className);
     if (this.isAsciiArtText(text)) classes.push('ascii-art');
     line.className = classes.join(' ');
-    line.textContent = text;
+    this.appendLinkified(line, text);
     this.outputElement.appendChild(line);
     this.outputElement.scrollTop = this.outputElement.scrollHeight;
+  }
+
+  appendLinkified(element, text) {
+    if (typeof text !== 'string' || !text) {
+      element.textContent = text == null ? '' : String(text);
+      return;
+    }
+    // Match http(s) URLs and bare emails. Trailing punctuation is excluded.
+    const pattern = /(https?:\/\/[^\s<>"']+[^\s<>"'.,;:!?)\]}])|([\w.+-]+@[\w-]+\.[\w.-]+)/g;
+    let lastIndex = 0;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        element.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+      }
+      const a = document.createElement('a');
+      const isEmail = !!match[2];
+      a.href = isEmail ? `mailto:${match[0]}` : match[0];
+      a.textContent = match[0];
+      if (!isEmail) {
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+      }
+      element.appendChild(a);
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < text.length) {
+      element.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
   }
 
   addPrompt() {
@@ -158,7 +211,14 @@ class PortoOSTerminal {
 
     this.inputElement.addEventListener('input', (e) => {
       this.currentLine = e.target.value;
+      this.resizeInput();
     });
+  }
+
+  resizeInput() {
+    if (!this.inputElement) return;
+    const len = (this.inputElement.value || '').length;
+    this.inputElement.size = Math.max(1, len + 1);
   }
 
   executeCommand() {
@@ -171,6 +231,7 @@ class PortoOSTerminal {
     // Add to history
     this.history.unshift(this.currentLine);
     this.historyIndex = -1;
+    this.saveHistory();
 
     // Process command
     const result = this.commandProcessor.processCommand(this.currentLine);
@@ -184,8 +245,12 @@ class PortoOSTerminal {
       this.addOutput(result.error, 'error');
       this.addPrompt();
     } else if (result.output) {
-      this.addOutput(result.output);
-      this.addPrompt();
+      if (result.typed) {
+        this.typeOutput(result.output, () => this.addPrompt());
+      } else {
+        this.addOutput(result.output);
+        this.addPrompt();
+      }
     } else {
       this.addPrompt();
     }
@@ -193,6 +258,7 @@ class PortoOSTerminal {
     // Clear input
     this.inputElement.value = '';
     this.currentLine = '';
+    this.resizeInput();
     this.outputElement.scrollTop = this.outputElement.scrollHeight;
   }
 
@@ -200,7 +266,7 @@ class PortoOSTerminal {
     if (this.history.length === 0) return;
 
     this.historyIndex += direction;
-    
+
     if (this.historyIndex < 0) {
       this.historyIndex = -1;
       this.inputElement.value = '';
@@ -211,6 +277,7 @@ class PortoOSTerminal {
       this.inputElement.value = this.history[this.historyIndex];
       this.currentLine = this.history[this.historyIndex];
     }
+    this.resizeInput();
   }
 
   autocomplete() {
@@ -243,6 +310,7 @@ class PortoOSTerminal {
       const newValue = `cat ${completions[0]}`;
       this.inputElement.value = newValue;
       this.currentLine = newValue;
+      this.resizeInput();
     } else {
       const displayMatches = completions.slice(0, 5);
       this.addOutput(`Possible completions: ${displayMatches.join(' ')}${completions.length > 5 ? '...' : ''}`);
@@ -254,7 +322,7 @@ class PortoOSTerminal {
   handleGeneralAutocomplete(rawInput) {
     if (!this.inputElement) return;
     
-    const commands = ['ls', 'cd', 'cat', 'pwd', 'whoami', 'date', 'ps', 'uname', 'echo', 'clear', 'help', 'warnings', 'tree'];
+    const commands = ['ls', 'cd', 'cat', 'pwd', 'whoami', 'date', 'ps', 'uname', 'echo', 'clear', 'help', 'warnings', 'tree', 'history', 'man', 'theme', 'grep', 'find'];
     const aliases = ['about', 'skills', 'projects', 'contact', 'experience', 'experiences', 'education', '..'];
     const trimmedLeading = rawInput.replace(/^\s+/, '');
     const hasTrailingSpace = rawInput.endsWith(' ');
@@ -305,6 +373,7 @@ class PortoOSTerminal {
       const newValue = `${baseInput}${uniqueMatches[0]}`;
       this.inputElement.value = newValue;
       this.currentLine = newValue;
+      this.resizeInput();
     } else if (uniqueMatches.length > 0) {
       this.showCompletionOptions(uniqueMatches);
     }
@@ -317,6 +386,7 @@ class PortoOSTerminal {
       const newValue = `${baseInput}${completions[0]}`;
       this.inputElement.value = newValue;
       this.currentLine = newValue;
+      this.resizeInput();
     } else if (completions.length > 1) {
       this.showCompletionOptions(completions);
     }
@@ -371,6 +441,89 @@ class PortoOSTerminal {
     const separator = base === '/' ? '' : '/';
     const candidatePath = `${base}${separator}${entry}`;
     return this.filesystem.resolvePath(candidatePath);
+  }
+
+  typeOutput(text, done) {
+    if (!this.outputElement) { if (done) done(); return; }
+    const lines = String(text).split('\n');
+    let lineIdx = 0;
+    let charIdx = 0;
+    let currentLineEl = null;
+
+    // Allow skipping mid-animation
+    const skip = () => {
+      if (this._typingDone) return;
+      this._typingDone = true;
+      if (currentLineEl && currentLineEl.parentNode) currentLineEl.parentNode.removeChild(currentLineEl);
+      for (let i = lineIdx; i < lines.length; i++) this.addOutput(lines[i]);
+      cleanup();
+      if (done) done();
+    };
+    const cleanup = () => {
+      document.removeEventListener('keydown', skip);
+      this._skipTyping = null;
+    };
+    this._typingDone = false;
+    this._skipTyping = skip;
+    document.addEventListener('keydown', skip);
+
+    const tick = () => {
+      if (this._typingDone) return;
+      if (lineIdx >= lines.length) {
+        cleanup();
+        this._typingDone = true;
+        if (done) done();
+        return;
+      }
+      if (!currentLineEl) {
+        currentLineEl = document.createElement('div');
+        currentLineEl.className = 'terminal-line';
+        this.outputElement.appendChild(currentLineEl);
+      }
+      const line = lines[lineIdx];
+      // Type a small chunk per tick for speed
+      const chunk = Math.min(3, line.length - charIdx);
+      currentLineEl.textContent = line.slice(0, charIdx + chunk);
+      charIdx += chunk;
+      this.outputElement.scrollTop = this.outputElement.scrollHeight;
+      if (charIdx >= line.length) {
+        // finalize this line with linkification
+        currentLineEl.textContent = '';
+        this.appendLinkified(currentLineEl, line);
+        currentLineEl = null;
+        lineIdx++;
+        charIdx = 0;
+        setTimeout(tick, 8);
+      } else {
+        setTimeout(tick, 4);
+      }
+    };
+    tick();
+  }
+
+  loadHistory() {
+    try {
+      const raw = localStorage.getItem('portoos.history');
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr.slice(0, 200) : [];
+    } catch { return []; }
+  }
+
+  saveHistory() {
+    try {
+      localStorage.setItem('portoos.history', JSON.stringify(this.history.slice(0, 200)));
+    } catch {}
+  }
+
+  runCommand(text) {
+    if (!text) return;
+    if (this.inputElement) {
+      this.inputElement.value = text;
+      this.resizeInput();
+    }
+    this.currentLine = text;
+    this.executeCommand();
   }
 
   clearTerminal() {

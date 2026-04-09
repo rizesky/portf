@@ -8,3 +8,96 @@
   z-index: 0;
   background: linear-gradient(to bottom, #0f0f23 0%, #1a1a2e 100%);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  #bg-animation { display: none; }
+}
+
+/* Pixel-art desktop icons (CSS only, no images) */
+.pixel-icon {
+  width: 32px;
+  height: 32px;
+  margin: 8px auto !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  image-rendering: pixelated;
+  position: relative;
+}
+
+/* Folder */
+.icon-folder {
+  background:
+    linear-gradient(#f5c542, #f5c542) 0 6px / 32px 22px no-repeat,
+    linear-gradient(#f5c542, #f5c542) 0 0 / 14px 6px no-repeat !important;
+  box-shadow:
+    inset 0 0 0 2px #7a5a00,
+    0 0 6px rgba(245, 197, 66, 0.4) !important;
+}
+
+/* Document */
+.icon-doc {
+  background:
+    linear-gradient(#e8e8f0, #e8e8f0) 4px 0 / 24px 32px no-repeat !important;
+  box-shadow:
+    inset 0 0 0 2px #555,
+    0 0 6px rgba(255, 255, 255, 0.25) !important;
+}
+.icon-doc::before {
+  content: "";
+  position: absolute;
+  left: 8px; top: 8px;
+  width: 16px; height: 2px;
+  background: #555;
+  box-shadow:
+    0 4px 0 #555,
+    0 8px 0 #555,
+    0 12px 0 #555;
+}
+
+/* Terminal/monitor */
+.icon-terminal {
+  background: #14101f !important;
+  box-shadow:
+    inset 0 0 0 3px #c89bff,
+    0 0 8px rgba(200, 155, 255, 0.5) !important;
+}
+.icon-terminal::before {
+  content: ">_";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: #c89bff;
+  text-shadow: 0 0 4px #c89bff;
+}
+
+/* Profile (pixel face) */
+.icon-profile {
+  background: #c89bff !important;
+  box-shadow:
+    inset 0 0 0 2px #6b3fa0,
+    0 0 8px rgba(200, 155, 255, 0.5) !important;
+}
+.icon-profile::before {
+  content: "";
+  position: absolute;
+  left: 9px; top: 9px;
+  width: 4px; height: 4px;
+  background: #14101f;
+  box-shadow: 10px 0 0 #14101f;
+}
+.icon-profile::after {
+  content: "";
+  position: absolute;
+  left: 10px; bottom: 8px;
+  width: 12px; height: 2px;
+  background: #14101f;
+}
+
+.icon { transition: transform 0.15s ease; }
+.icon:hover { transform: translateY(-2px); }
+.icon:hover .pixel-icon { filter: brightness(1.2); }

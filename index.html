@@ -2,14 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PortoOS - Rizesky Portfolio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#14101f">
+    <title>PortoOS — Rizesky's Terminal Portfolio</title>
+    <meta name="description" content="An interactive retro-OS portfolio. Explore Rizesky's work through a terminal: type 'help' to begin.">
+    <meta name="author" content="Rizesky">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PortoOS — Rizesky's Terminal Portfolio">
+    <meta property="og:description" content="An interactive retro-OS portfolio. Explore Rizesky's work through a terminal.">
+    <meta property="og:site_name" content="PortoOS">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PortoOS — Rizesky's Terminal Portfolio">
+    <meta name="twitter:description" content="An interactive retro-OS portfolio. Type 'help' to explore.">
+
+    <!-- Favicon (inline SVG, pixel terminal glyph) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2314101f'/%3E%3Crect x='1' y='1' width='14' height='14' fill='none' stroke='%23c89bff' stroke-width='1'/%3E%3Ctext x='3' y='12' font-family='monospace' font-size='10' fill='%23c89bff'%3E%3E_%3C/text%3E%3C/svg%3E">
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-    
-    <!-- NES.css for retro styling -->
-    <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     
     <!-- Custom styles -->
     <link rel="stylesheet" href="main.css">
@@ -22,40 +36,51 @@
     
           <!-- Desktop Icons -->
           <div class="desktop-icons">
-              <div class="icon">
-                  <div class="icon-image">👨‍💻</div>
+              <div class="icon" data-action="profile">
+                  <div class="icon-image pixel-icon icon-profile" aria-hidden="true"></div>
                   <div class="icon-label">Profile</div>
               </div>
-              <div class="icon">
-                  <div class="icon-image">🖥️</div>
+              <div class="icon" data-action="terminal">
+                  <div class="icon-image pixel-icon icon-terminal" aria-hidden="true"></div>
                   <div class="icon-label">Terminal</div>
               </div>
-              <div class="icon">
-                  <div class="icon-image">📂</div>
+              <div class="icon" data-action="projects">
+                  <div class="icon-image pixel-icon icon-folder" aria-hidden="true"></div>
                   <div class="icon-label">Projects</div>
               </div>
-              <div class="icon">
-                  <div class="icon-image">📄</div>
+              <div class="icon" data-action="resume">
+                  <div class="icon-image pixel-icon icon-doc" aria-hidden="true"></div>
                   <div class="icon-label">Resume</div>
               </div>
           </div>
     
     <!-- Terminal Window -->
-    <div id="terminal-window" class="terminal-window nes-container is-dark is-rounded">
+    <div id="terminal-window" class="terminal-window">
         <div class="terminal-header">
+            <div class="terminal-title">▣ Terminal — visitor@portoos</div>
             <div class="terminal-buttons">
-                <button class="nes-btn is-error" id="close-btn" aria-label="Close terminal"></button>
-                <button class="nes-btn is-warning" id="minimize-btn" aria-label="Minimize terminal"></button>
-                <button class="nes-btn is-success" id="maximize-btn" aria-label="Maximize terminal"></button>
+                <button class="win-btn" id="minimize-btn" aria-label="Minimize terminal">_</button>
+                <button class="win-btn" id="maximize-btn" aria-label="Maximize terminal">▢</button>
+                <button class="win-btn win-btn-close" id="close-btn" aria-label="Close terminal">×</button>
             </div>
-            <div class="terminal-title">Terminal</div>
         </div>
         
         <div class="terminal-body">
-            <div id="terminal-output" class="terminal-output"></div>
+            <div id="terminal-output" class="terminal-output" role="log" aria-live="polite" aria-label="Terminal output"></div>
         </div>
     </div>
     
+    <!-- Mobile key bar (touch-only) -->
+    <div id="mobile-keybar" class="mobile-keybar" aria-hidden="true">
+        <button type="button" data-key="Tab">TAB</button>
+        <button type="button" data-key="ArrowUp">↑</button>
+        <button type="button" data-key="ArrowDown">↓</button>
+        <button type="button" data-insert="/">/</button>
+        <button type="button" data-insert="-">-</button>
+        <button type="button" data-insert="..">..</button>
+        <button type="button" data-key="Enter">⏎</button>
+    </div>
+
     <!-- Taskbar -->
     <div class="taskbar">
         <div class="taskbar-start">PortoOS</div>

@@ -12,41 +12,106 @@ class PortoOSFileSystem {
             children: {
               'experience.txt': {
                 type: 'file',
-                content: `Software Engineer | Mar 2023 - Mar 2025
-• Designed and developed backend services for large-scale multiplayer gaming platforms, supporting real-time, high
-  concurrency workloads.
-• Designed and improved platform services for server upload and configuration promotion, enabling clients to manage game
-  server environments reliably and reducing deployment errors by 25%.
-• Resolved critical production issues, such as deployment overshoot and core dump failures, improving system stability and
-  observability. Resulting in much better client satisfaction.
-• Designed and implemented event-driven systems using Kafka and also other cheaper pubsub/queue tool to support scalable,
-  asynchronous communication across distributed services, improving system resilience and decoupling.
-• Developed data intelligence services to support game analytics and player data processing, integrating with AWS Data
-  Kinesis, and Fivetran and other vendor as per client requests.
-• Operated distributed game multiplayer platform systems across multi-cloud environments including Amazon Web Services,
-  Google Cloud, and Microsoft Azure using Kubernetes and Nomad.
+                content: `Software Engineer — Game Backend Platform | Mar 2023 — Mar 2025
 
-Software Engineer Backend | Oct 2022 - Mar 2023
-•Designed and optimized backend services for a user-facing loan system, improving processing performance by 15% and
- enabling more successful loan applications.
-•Developed and updated internal auditing services to improve financial transparency and strengthen risk control. 
-•Maintained backend systems for credit and loan services, ensuring reliability in financial operations.
+Built and operated the platform that game studios used to ship
+and run their multiplayer servers across regions. Lots of moving
+parts, lots of opinions about what "good" looks like.
 
-Software Engineer Backend | Oct 2021 - Oct 2022
-• Developed and maintained collection and recovery backend systems
-• Included contract management, unit management, bidding, tracking, and remarketing services
-• Refactored application architecture, eliminating redundant code layers, improving stability and overall performance
-• Designed and implemented three interrelated backend services for unit tracking and recovery
+What I actually did:
+• Worked on the server-upload and config-promotion pipeline,
+  helping move it toward a self-serve flow with versioned
+  rollouts so studios weren't blocked on us for every deploy.
+• Helped chase down deployment overshoot and core dump issues
+  that were hurting reliability — reproduced, fixed, and added
+  the observability we'd been missing.
+• Built event pipelines that fan gameplay events out to analytics.
+  Kafka where it earned its keep, cheaper pub/sub where it didn't.
+• Wired data intelligence services to AWS Kinesis, Fivetran, and
+  a few other vendors clients insisted on. Mostly the boring
+  part: schemas, contracts, idempotency, retries.
+• Ran workloads across AWS, GCP, and Azure (the joys of
+  multi-cloud-by-customer-request). Kubernetes for the new fleet,
+  Nomad for the bits we hadn't migrated yet.
 
-Software Engineer Backend | Apr 2019 - Oct 2021
-• Developed and maintained microservices for client management, premium processing, agent services, and internal tooling
-• Optimized data structures and process flows for traditional and unit-link products
-• Improved system performance and reliability
+Stack: Go (mostly), Java, gRPC, Kafka, Kinesis, K8s, Nomad,
+Terraform, the usual observability suspects.
 
-Backend Developer | Sept 2018 - Apr 2019
-• Developed backend services for programmatic advertising and big data processing (Hadoop, Hive)
-• Modernized legacy applications using modern technologies
-• Improved performance, maintainability, and scalability`
+──────────────────────────────────────────────────────────────
+
+Software Engineer Backend — Fintech / Lending | Oct 2022 — Mar 2023
+
+Short stint, sharp focus: keep the loan system fast and the
+auditors happy.
+
+• Profiled and reshaped the hot path on a user-facing loan
+  application service. Cut latency enough to push approval
+  throughput up ~15% — turns out the slow part was a query
+  nobody had looked at since the original migration.
+• Rewrote chunks of the internal auditing service so finance
+  could actually trust the numbers and risk could see what
+  changed and when.
+• Kept credit and loan backends boringly reliable. Boring is
+  the highest compliment you can pay a money-moving system.
+
+Stack: Java, Spring Boot, PostgreSQL, Redis.
+
+──────────────────────────────────────────────────────────────
+
+Software Engineer Backend — Collections & Recovery | Oct 2021 — Oct 2022
+
+The unsexy half of lending: what happens after someone stops
+paying. Contract management, bidding, tracking, remarketing —
+a tangled domain with real consequences for real people.
+
+• Inherited an architecture that had grown four layers thick
+  for no good reason. Stripped two of them out without breaking
+  prod. Performance and on-call sanity both improved.
+• Designed and shipped three backend services that talked to
+  each other for unit tracking and recovery. Drew a lot of
+  sequence diagrams. Revised them more times than I'd like.
+• Spent a lot of time arguing for clearer domain models. Worth
+  every meeting.
+
+Stack: Java, Spring Boot, PostgreSQL.
+
+──────────────────────────────────────────────────────────────
+
+Software Engineer Backend — Insurance | Apr 2019 — Oct 2021
+
+Big legacy insurance stack. Deep, careful work — the kind
+where moving fast and breaking things is genuinely how you get
+sued.
+
+• Maintained and extended microservices for client management,
+  premium processing, agent services, and the internal tools
+  that kept the operations team sane.
+• Got intimate with traditional vs unit-link product math —
+  the data structures alone are an education in actuarial
+  pragmatism.
+• Quietly improved performance and reliability across the
+  fleet. Nothing flashy, just fewer pages.
+
+Stack: Java, Spring Boot, Oracle DB, microservices.
+
+──────────────────────────────────────────────────────────────
+
+Backend Developer — AdTech & Big Data | Sept 2018 — Apr 2019
+
+First role out the gate. Programmatic advertising at scale,
+which is a fancy way of saying "every request matters and
+nothing is allowed to be slow."
+
+• Wrote backend services that fed Hadoop / Hive pipelines for
+  ad analytics. Learned what "data-intensive" really means
+  the hard way.
+• Helped drag legacy apps into the modern era. Turns out
+  modernization is 10% new tech and 90% reading old code very
+  carefully.
+• Picked up a healthy respect for systems that have been
+  running longer than you've been a developer.
+
+Stack: Java, Hadoop, Hive.`
               },
               'skills.txt': {
                 type: 'file',
@@ -175,20 +240,42 @@ Backend Developer | Sept 2018 - Apr 2019
               },
               'education.txt': {
                 type: 'file',
-                content: `Institut Teknologi Del | 2015-2018
-Bachelor of Information Technology
+                content: `Institut Teknologi Del | 2015 — 2018
+Information Technology (3 years, did not finish)
 
-SMA Unggul Del | 2012-2015
-Science`
+Three years in. Late nights, terrible coffee, and the kind of
+professors who make you actually understand pointers before
+they let you pass. I left before graduating to start working
+full-time as an engineer — most of what I know about the craft
+I learned on the job, but the foundations came from here.
+
+SMA Unggul Del | 2012 — 2015
+Science track
+
+This is where I first wrote something that printed
+"Hello, World" and felt like a wizard.`
               },
               'summary.txt': {
                 type: 'file',
-                content: `I am a Software Engineer with ${new Date().getFullYear() - 2018} years of experience in Software Engineering.
-I like to build robust backend systems that work seamlessly and meet business needs.
+                content: `Hi, I'm Rizesky. I build backends that don't fall over.
 
-Hands-on in Java, Go, TypeScript, and Python. Crafted scalable
-enterprise apps, fintech platforms, data-intensive systems, and
-game backends infrastructure.`
+~7 years writing services in Java, Go, TypeScript, and Python.
+Mostly the unglamorous middle of the stack: queues, schemas,
+retries, the 3am pages. I've shipped fintech that moves real
+money, insurance platforms with decades of legacy to respect,
+ad-tech that crunches Hadoop jobs nobody wants to touch, and
+game backends that fan out to multi-region multiplayer fleets.
+
+I like: distributed systems, boring technology, code that's
+obviously correct, postmortems that don't blame people, and
+shipping things end-to-end instead of throwing JIRA tickets
+over a wall.
+
+I dislike: microservices for the sake of it, untyped JSON
+floating between services, and "we'll add tests later".
+
+Type 'cat about/experience.txt' for the long version,
+or 'cat contact/email.txt' if you want to talk.`
               }
             }
           },
@@ -200,27 +287,31 @@ game backends infrastructure.`
                 children: {
                   'README.md': {
                     type: 'file',
-                    content: `# Game Backend Infrastructure (PAAS)
+                    content: `# Game Backend Platform (PaaS)
 
-Built scalable game server management systems for modern gaming platforms.
+The control plane game studios used to ship and operate their
+multiplayer servers. Think Heroku, but for game servers, with
+the added joy of multi-cloud and "the build pipeline can't be
+slower than the studio's patience."
 
-## Features
-- Server uploader and config promoter
-- Analytics pipelines for in-game data
-- Player engagement insights
-- Matchmaking optimization
-- Monetization analytics
+## What it actually does
+- Server uploader + config promoter (versioned, rollback-able)
+- Event pipelines fanning gameplay data into analytics
+- Matchmaking knobs the platform team could tune without
+  rebuilding services
+- Monetization analytics that didn't lie to the finance team
 
-## Technologies
-- Go
-- Kubernetes
-- Nomad
-- gRPC
+## Stack
+- Go for everything new
+- Kubernetes (new fleet) + Nomad (legacy fleet)
+- gRPC between services, Kafka where it earned it
+- Terraform, the usual observability stack
 
-## Achievements
-- 25% improvement in uptime
-- Reduced deployment errors significantly
-- Enhanced system reliability`
+## What I'm proud of
+- Bad-deploy rate dropped ~25% after the self-serve flow shipped
+- Found and killed a long-standing pod-overshoot bug nobody had
+  isolated; it lived in the reconciliation loop
+- Resisted the "Kafka for everything" reflex and saved real money`
                   },
                   'tech-stack.txt': {
                     type: 'file',
@@ -235,25 +326,30 @@ Built scalable game server management systems for modern gaming platforms.
                     type: 'file',
                     content: `# Fintech Loan Platform
 
-Developed credit scoring and loan disbursement APIs for financial services.
+The backends behind a user-facing loan product: scoring,
+disbursement, and the auditing layer the finance and risk
+teams actually trusted.
 
-## Features
-- Credit scoring algorithms
-- Loan disbursement APIs
-- Risk assessment
-- Payment processing
-- Audit trails
+## What it actually does
+- Credit scoring on the hot path (had to be fast or applications
+  timed out)
+- Loan disbursement APIs that talked to a dozen downstream
+  systems and had to stay idempotent
+- Audit trails that finance could query without paging an engineer
+- Payment processing that couldn't lose a single message
 
-## Technologies
-- Java
-- Spring Boot
-- PostgreSQL
-- Redis
+## Stack
+- Java + Spring Boot
+- PostgreSQL (the source of truth)
+- Redis (the speed layer)
 
-## Achievements
-- 15% performance improvement
-- Enhanced maintainability
-- Improved deployment efficiency`
+## What I'm proud of
+- ~15% throughput bump on the application flow after profiling
+  uncovered a query nobody had touched since the original migration
+- Rewrote the auditing service so finance stopped DM'ing engineers
+  for ad-hoc reports
+- Zero money-losing incidents on my watch — the highest compliment
+  you can pay a system that moves money`
                   },
                   'tech-stack.txt': {
                     type: 'file',
@@ -268,25 +364,30 @@ Developed credit scoring and loan disbursement APIs for financial services.
                     type: 'file',
                     content: `# Insurance Microservices
 
-Designed and implemented client/agent service APIs for insurance platform.
+A big legacy insurance stack that needed careful, deliberate
+work. This is the kind of domain where moving fast and breaking
+things is genuinely how you get sued.
 
-## Features
-- Client management services
-- Premium processing
-- Agent services
-- Internal tooling
-- Unit-link products
+## What it actually does
+- Client management — onboarding, KYC, the messy real-world bits
+- Premium processing — schedules, grace periods, the math you
+  do not want to get wrong
+- Agent services — the tools field agents lived in all day
+- Internal tooling that kept ops from drowning
+- Unit-link product flows (the data structures alone are an
+  education in actuarial pragmatism)
 
-## Technologies
-- Java
-- Spring Boot
-- Oracle DB
-- Microservices architecture
+## Stack
+- Java + Spring Boot
+- Oracle DB (yes, Oracle, and yes I learned to love it)
+- Microservices, sized to the domain — not because microservices
 
-## Achievements
-- Eliminated redundant code layers
-- Improved system stability
-- Enhanced performance`
+## What I'm proud of
+- Quietly removed two redundant layers from the architecture
+  without a single rollback
+- Got the on-call rotation a lot quieter than I found it
+- Built up a deep respect for systems that have been running
+  longer than I've been a developer`
                   },
                   'tech-stack.txt': {
                     type: 'file',
@@ -328,7 +429,7 @@ GitHub: github.com/rizesky`
 
 ═══════════════════════════════════════
 🎯 Backend Engineer | Software Engineer
-🚀 ${new Date().getFullYear() - 2018} years of experience
+🚀 7 years of experience
 💻 Java, Go, TypeScript, Python
 ☁️  AWS, GCP, Azure
 🔧 Microservices, DevOps, Kubernetes

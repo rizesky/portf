@@ -11,6 +11,12 @@ class PortoOSApp {
 
   init() {
     console.log('PortoOS App initializing...');
+
+    // Restore persisted theme
+    try {
+      const savedTheme = localStorage.getItem('portoos.theme');
+      if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+    } catch {}
     
     // Initialize background animation
     this.background = new BackgroundAnimation();
@@ -27,6 +33,15 @@ class PortoOSApp {
     
     // Set up clock
     this.setupClock();
+
+    // Wire desktop icons
+    this.setupDesktopIcons();
+
+    // Wire mobile keybar
+    this.setupMobileKeybar();
+
+    // Konami code easter egg
+    this.setupKonamiCode();
     
     console.log('PortoOS App initialized!');
   }
@@ -70,7 +85,7 @@ class PortoOSApp {
         
         // Keep window within viewport bounds
         const maxX = window.innerWidth - this.terminalElement.offsetWidth;
-        const maxY = window.innerHeight - this.terminalElement.offsetHeight - 40; // 40 for taskbar
+        const maxY = window.innerHeight - this.terminalElement.offsetHeight - 36; // taskbar height
         
         newX = Math.max(0, Math.min(newX, maxX));
         newY = Math.max(0, Math.min(newY, maxY));
@@ -80,9 +95,10 @@ class PortoOSApp {
       }
     });
     
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('mouseup', (e) => {
       if (isDragging) {
         document.body.style.cursor = 'default';
+        this.maybeSnap(e.clientX, e.clientY);
       }
       isDragging = false;
     });
@@ -91,6 +107,32 @@ class PortoOSApp {
     header.addEventListener('dblclick', () => {
       this.toggleMaximize();
     });
+  }
+
+  maybeSnap(x, y) {
+    const w = window.innerWidth;
+    const h = window.innerHeight - 36; // taskbar
+    const edge = 20;
+    const el = this.terminalElement;
+    if (!el) return;
+
+    const apply = (left, top, width, height) => {
+      el.style.left = left;
+      el.style.top = top;
+      el.style.width = width;
+      el.style.height = height;
+      this.isMaximized = false;
+    };
+
+    if (y <= edge) {
+      // top → maximize
+      apply('0', '0', '100vw', `calc(100vh - 36px)`);
+      this.isMaximized = true;
+    } else if (x <= edge) {
+      apply('0', '0', '50vw', `calc(100vh - 36px)`);
+    } else if (x >= w - edge) {
+      apply('50vw', '0', '50vw', `calc(100vh - 36px)`);
+    }
   }
 
   toggleMaximize() {
@@ -104,7 +146,7 @@ class PortoOSApp {
     } else {
       // Maximize
       this.terminalElement.style.width = '100vw';
-      this.terminalElement.style.height = 'calc(100vh - 40px)';
+      this.terminalElement.style.height = 'calc(100vh - 36px)';
       this.terminalElement.style.top = '0';
       this.terminalElement.style.left = '0';
       this.isMaximized = true;
@@ -137,6 +179,100 @@ class PortoOSApp {
     if (closeTaskbarBtn) {
       closeTaskbarBtn.addEventListener('click', () => this.closeTerminal());
     }
+  }
+
+  setupDesktopIcons() {
+    const actions = {
+      profile: 'profile',
+      terminal: null, // just focus
+      projects: 'tree projects/',
+      resume: 'cat about/experience.txt'
+    };
+    document.querySelectorAll('.desktop-icons .icon').forEach(icon => {
+      icon.addEventListener('click', () => {
+        const action = icon.dataset.action;
+        if (this.isTerminalMinimized) this.toggleTerminal();
+        const cmd = actions[action];
+        if (cmd && this.terminal && this.terminal.runCommand) {
+          this.terminal.runCommand(cmd);
+        } else if (this.terminal && this.terminal.focusInput) {
+          this.terminal.focusInput();
+        }
+      });
+    });
+  }
+
+  setupMobileKeybar() {
+    const bar = document.getElementById('mobile-keybar');
+    if (!bar) return;
+    bar.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      e.preventDefault();
+      const input = this.terminal && this.terminal.inputElement;
+      if (!input) return;
+      input.focus();
+
+      if (btn.dataset.insert) {
+        const start = input.selectionStart ?? input.value.length;
+        const end = input.selectionEnd ?? input.value.length;
+        input.value = input.value.slice(0, start) + btn.dataset.insert + input.value.slice(end);
+        const pos = start + btn.dataset.insert.length;
+        input.setSelectionRange(pos, pos);
+        this.terminal.currentLine = input.value;
+        return;
+      }
+
+      const key = btn.dataset.key;
+      if (!key) return;
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      input.dispatchEvent(event);
+    });
+    // Prevent the keybar from stealing focus from the input on touch
+    bar.addEventListener('mousedown', (e) => e.preventDefault());
+    bar.addEventListener('touchstart', (e) => {
+      // allow click but keep input focused
+      const input = this.terminal && this.terminal.inputElement;
+      if (input) setTimeout(() => input.focus(), 0);
+    }, { passive: true });
+  }
+
+  setupKonamiCode() {
+    const sequence = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let pos = 0;
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (key === sequence[pos]) {
+        pos++;
+        if (pos === sequence.length) {
+          pos = 0;
+          this.triggerKonami();
+        }
+      } else {
+        pos = key === sequence[0] ? 1 : 0;
+      }
+    });
+  }
+
+  triggerKonami() {
+    if (!this.terminal) return;
+    const themes = ['purple', 'matrix', 'amber'];
+    const current = document.documentElement.getAttribute('data-theme') || 'purple';
+    const next = themes[(themes.indexOf(current) + 1) % themes.length];
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('portoos.theme', next); } catch {}
+
+    this.terminal.addOutput('');
+    this.terminal.addOutput('★ KONAMI CODE ACTIVATED ★');
+    this.terminal.addOutput(`+30 lives. Theme cycled to '${next}'.`);
+    this.terminal.addOutput('');
+
+    // Brief screen flash
+    const flash = document.createElement('div');
+    flash.style.cssText = 'position:fixed;inset:0;background:var(--fg-primary);opacity:0.6;z-index:9998;pointer-events:none;transition:opacity 0.6s ease-out;';
+    document.body.appendChild(flash);
+    requestAnimationFrame(() => { flash.style.opacity = '0'; });
+    setTimeout(() => flash.remove(), 700);
   }
 
   setupClock() {

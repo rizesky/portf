@@ -1,3 +1,56 @@
+/* Theme variables (overridable via [data-theme] on <html>) */
+:root,
+:root[data-theme="purple"] {
+  --bg-deep: #0f0a1c;
+  --bg-chrome: #1a1430;
+  --bg-terminal: #14101f;
+  --fg-primary: #e9d5ff;
+  --fg-accent: #c89bff;
+  --fg-muted: #6b3fa0;
+  --fg-error: #ff6b6b;
+  --fg-link: #7ee7ff;
+  --glow: rgba(200, 155, 255, 0.55);
+  --glow-soft: rgba(200, 155, 255, 0.25);
+  --titlebar-from: #6b3fa0;
+  --titlebar-to: #c89bff;
+  --bevel-light: rgba(255, 255, 255, 0.5);
+  --bevel-dark: rgba(0, 0, 0, 0.6);
+}
+
+:root[data-theme="matrix"] {
+  --bg-deep: #001008;
+  --bg-chrome: #001a10;
+  --bg-terminal: #001008;
+  --fg-primary: #39ff14;
+  --fg-accent: #00cc44;
+  --fg-muted: #006622;
+  --fg-error: #ff5555;
+  --fg-link: #aaffaa;
+  --glow: rgba(57, 255, 20, 0.55);
+  --glow-soft: rgba(57, 255, 20, 0.25);
+  --titlebar-from: #003311;
+  --titlebar-to: #00cc44;
+  --bevel-light: rgba(170, 255, 170, 0.4);
+  --bevel-dark: rgba(0, 0, 0, 0.7);
+}
+
+:root[data-theme="amber"] {
+  --bg-deep: #1a0f00;
+  --bg-chrome: #221400;
+  --bg-terminal: #1a0f00;
+  --fg-primary: #ffb000;
+  --fg-accent: #ff8800;
+  --fg-muted: #663300;
+  --fg-error: #ff5544;
+  --fg-link: #ffe080;
+  --glow: rgba(255, 176, 0, 0.55);
+  --glow-soft: rgba(255, 176, 0, 0.25);
+  --titlebar-from: #663300;
+  --titlebar-to: #ff8800;
+  --bevel-light: rgba(255, 224, 128, 0.4);
+  --bevel-dark: rgba(0, 0, 0, 0.7);
+}
+
 /* Reset and base styles */
 * {
   box-sizing: border-box;
@@ -8,8 +61,8 @@ html, body {
   padding: 0;
   height: 100%;
   overflow: hidden;
-  background: #1a1a2e;
-  color: #fff;
+  background: var(--bg-deep);
+  color: var(--fg-primary);
   font-family: 'Press Start 2P', cursive;
 }
 
@@ -37,9 +90,9 @@ html, body {
   .icon-image {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #9d4edd, #7c3aed);
+    background: linear-gradient(135deg, var(--fg-accent), #7c3aed);
     margin: 0 auto 8px;
-    border: 2px solid #9d4edd;
+    border: 2px solid var(--fg-accent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -53,7 +106,7 @@ html, body {
   text-shadow: 1px 1px 2px #000;
 }
 
-/* Terminal Window */
+/* Terminal Window — Win9x bevel chrome */
 .terminal-window {
   width: 95vw;
   max-width: 1200px;
@@ -65,13 +118,17 @@ html, body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 
-    0 0 20px rgba(168, 85, 247, 0.2),
-    0 0 40px rgba(139, 92, 246, 0.1),
-    0 8px 32px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  background: var(--bg-chrome);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  box-shadow:
+    inset 1px 1px 0 var(--bevel-light),
+    inset -1px -1px 0 var(--bevel-dark),
+    0 0 30px var(--glow-soft),
+    0 8px 32px rgba(0, 0, 0, 0.6);
   resize: both;
   overflow: hidden;
+  padding: 3px;
 }
 
 /* Taskbar */
@@ -80,112 +137,172 @@ html, body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 40px;
-  background: #2a2a4e;
-  border-top: 2px solid #9d4edd;
+  height: 36px;
+  background: var(--bg-chrome);
+  border-top: 2px solid var(--bevel-light);
+  box-shadow: inset 0 1px 0 var(--bevel-light), 0 -2px 16px var(--glow-soft);
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 3px 4px;
   z-index: 2;
+  font-family: 'Tahoma', 'Verdana', sans-serif;
 }
 
 .taskbar-start {
-  padding: 5px 15px;
-  background: linear-gradient(135deg, #9d4edd, #7c3aed);
-  color: #000;
-  font-size: 0.7rem;
+  padding: 4px 12px 4px 10px;
+  background: var(--bg-chrome);
+  color: var(--fg-primary);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
   font-weight: bold;
   cursor: pointer;
-  border: 2px solid #9d4edd;
-  box-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  box-shadow: inset 1px 1px 0 var(--bevel-light), inset -1px -1px 0 var(--bevel-dark);
+  text-shadow: 0 0 4px var(--glow);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
 }
 
+.taskbar-start::before {
+  content: "▣";
+  font-family: monospace;
+  font-size: 12px;
+  text-shadow: 0 0 6px var(--glow);
+}
+
+.taskbar-start:active,
 .taskbar-start:hover {
-  background: #9333ea;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  box-shadow: inset -1px -1px 0 var(--bevel-light), inset 1px 1px 0 var(--bevel-dark);
 }
 
 .taskbar-apps {
   display: flex;
-  gap: 5px;
-  margin-left: 10px;
+  gap: 4px;
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid var(--bevel-dark);
+  box-shadow: -1px 0 0 var(--bevel-light);
+  height: 28px;
+  align-items: center;
 }
 
 .taskbar-app {
-  padding: 5px 10px;
-  background: #1a1a2e;
-  border: 1px solid #9d4edd;
-  font-size: 0.6rem;
-  color: #9d4edd;
+  padding: 4px 10px;
+  background: var(--bg-chrome);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  font-family: 'Tahoma', 'Verdana', sans-serif;
+  font-size: 0.75rem;
+  color: var(--fg-primary);
   cursor: pointer;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 24px;
-}
-
-.taskbar-app:hover {
-  background: #9333ea;
-  color: #000;
+  height: 26px;
+  text-shadow: 0 0 3px var(--glow-soft);
 }
 
 .taskbar-app.active {
-  background: #9d4edd;
-  color: #000;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  background: var(--bg-deep);
+  box-shadow: inset 1px 1px 2px var(--bevel-dark);
 }
 
 .taskbar-app.close-btn {
-  background: #dc2626;
-  color: #fff;
+  color: var(--fg-error);
   font-weight: bold;
-  cursor: pointer;
 }
 
-.taskbar-app.close-btn:hover {
-  background: #ef4444;
-}
-
-.taskbar-app.active:hover {
-  background: #9333ea;
+.taskbar-app.close-btn:active {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
 }
 
 /* Terminal group - merged component */
 .taskbar-terminal-group {
   display: flex;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  gap: 2px;
 }
 
 .taskbar-terminal-group .taskbar-app {
-  border-radius: 0;
   margin: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.taskbar-terminal-group .taskbar-app:last-child {
-  border-right: none;
-}
-
-.taskbar-terminal-group .taskbar-app.active {
-  background: #9d4edd;
-  color: #000;
 }
 
 .taskbar-terminal-group .taskbar-app.close-btn {
-  background: #dc2626;
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  padding: 8px 12px;
-}
-
-.taskbar-terminal-group .taskbar-app.close-btn:hover {
-  background: #ef4444;
+  padding: 4px 10px;
 }
 
 .taskbar-time {
   margin-left: auto;
-  font-size: 0.6rem;
-  color: #9d4edd;
+  font-family: 'Tahoma', 'Verdana', sans-serif;
+  font-size: 0.7rem;
+  color: var(--fg-primary);
+  padding: 4px 10px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  background: var(--bg-chrome);
+  text-shadow: 0 0 4px var(--glow);
+  height: 26px;
+  display: flex;
+  align-items: center;
+}
+
+/* Mobile key bar — hidden on desktop, shown on touch / narrow screens */
+.mobile-keybar {
+  display: none;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .mobile-keybar {
+    display: flex;
+    position: fixed;
+    bottom: 36px;
+    left: 0;
+    right: 0;
+    height: 44px;
+    background: var(--bg-chrome);
+    border-top: 2px solid var(--fg-primary);
+    padding: 4px 6px;
+    gap: 4px;
+    z-index: 200;
+    overflow-x: auto;
+  }
+  .mobile-keybar button {
+    flex: 1 0 auto;
+    min-width: 44px;
+    background: var(--bg-deep);
+    color: var(--fg-primary);
+    border: 2px solid var(--fg-primary);
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    cursor: pointer;
+    text-shadow: 0 0 4px rgba(200, 155, 255, 0.55);
+  }
+  .mobile-keybar button:active {
+    background: var(--fg-primary);
+    color: var(--bg-chrome);
+  }
+
+  /* Make terminal usable on phones */
+  .terminal-window {
+    width: 100vw !important;
+    height: calc(100vh - 84px) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    border-radius: 0 !important;
+    resize: none !important;
+  }
+
+  .desktop-icons {
+    top: 8px;
+    left: 8px;
+  }
+  .icon { width: 56px; margin-bottom: 12px; }
+  .pixel-icon { width: 28px; height: 28px; }
 }
