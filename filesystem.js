@@ -326,10 +326,6 @@ things is genuinely how you get sued.
                       type: 'file',
                       content: `rizesky.slgn@gmail.com`
                     },
-                    'phone.txt': {
-                      type: 'file',
-                      content: `+62 822-9474-9017`
-                    },
                     'social.txt': {
                       type: 'file',
                       content: `LinkedIn: linkedin.com/in/rizesky
