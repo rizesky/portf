@@ -115,128 +115,50 @@ Stack: Java, Hadoop, Hive.`
               },
               'skills.txt': {
                 type: 'file',
-                content: `Skills Tree:
-├── Languages
-│   ├── Java (Expert)
-│   │   ├── Spring Boot
-│   │   ├── Quarkus
-│   │   ├── Spring Security
-│   │   └── JUnit
-│   ├── Go (Advanced)
-│   │   ├── Gin
-│   │   ├── Gorestful
-│   │   ├── Echo
-│   │   └── Chi
-│   ├── TypeScript (Advanced)
-│   │   ├── NestJS
-│   │   ├── Express.js
-│   │   └── Fastify
-│   ├── Python (Intermediate)
-│   │   ├── FastAPI
-│   │   ├── Django
-│   │   ├── Flask
-│   │   └── Data processing
-│   └── SQL (Advanced)
-│       ├── PostgreSQL
-│       ├── MySQL
-│       ├── Oracle
-│       └── SQL Server
-├── Backend Technologies
-│   ├── Message Queues
-│   │   ├── Apache Kafka
-│   │   ├── RabbitMQ
-│   │   ├── Redis Pub/Sub
-│   │   └── Amazon SQS
-│   ├── Databases
-│   │   ├── PostgreSQL
-│   │   ├── MySQL
-│   │   ├── Oracle
-│   │   ├── MongoDB
-│   │   ├── Redis
-│   │   └── Cassandra
-│   ├── Caching
-│   │   ├── Redis
-│   │   ├── Memcached
-│   │   ├── Hazelcast
-│   │   └── Caffeine
-│   ├── Search Engines
-│   │   ├── Elasticsearch
-│   │   ├── Apache Solr
-│   │   └── OpenSearch
-│   ├── API Gateway
-│   │   ├── Kong
-│   │   ├── Zuul
-│   │   ├── AWS API Gateway
-│   │   └── Google Cloud Endpoints
-│   └── Microservices
-│       ├── Service Mesh (Istio)
-│       ├── Circuit Breakers
-│       ├── Load Balancing
-│       └── Service Discovery
-├── Cloud Platforms
-│   ├── AWS
-│   │   ├── EC2, ECS, EKS
-│   │   ├── RDS
-│   │   ├── S3, CloudFront
-│   │   ├── Lambda, API Gateway
-│   │   ├── SQS, SNS, EventBridge
-│   │   ├── CloudWatch
-│   │   └── IAM, VPC
-│   ├── Google Cloud Platform
-│   │   ├── Compute Engine, GKE
-│   │   ├── Cloud SQL, Firestore
-│   │   ├── Cloud Storage, CDN
-│   │   ├── Cloud Functions, Cloud Run
-│   │   ├── Pub/Sub, Cloud Tasks
-│   │   ├── Monitoring, Logging
-│   │   └── IAM, VPC, Security
-│   └── Microsoft Azure
-│       ├── Virtual Machines, AKS
-│       ├── SQL Database, Cosmos DB
-│       ├── Blob Storage, CDN
-│       ├── Functions, App Service
-│       ├── Service Bus, Event Grid
-│       ├── Monitor, Application Insights
-│       └── Active Directory, VNet
-├── DevOps & Infrastructure
-│   ├── Containerization
-│   │   ├── Docker
-│   │   ├── Docker Compose
-│   │   └── Container Registry
-│   ├── Orchestration
-│   │   ├── Kubernetes
-│   │   ├── Docker Swarm
-│   │   └── Nomad
-│   ├── Infrastructure as Code
-│   │   ├── Terraform
-│   │   ├── CloudFormation
-│   │   └── Ansible
-│   ├── CI/CD
-│   │   ├── Jenkins
-│   │   ├── GitLab CI
-│   │   ├── GitHub Actions
-│   │   ├── Azure DevOps
-│   │   └── CircleCI
-│   ├── Monitoring & Observability
-│   │   ├── Prometheus
-│   │   ├── Grafana
-│   │   ├── ELK Stack
-│   │   ├── Jaeger
-│   │   ├── New Relic
-│   │   └── DataDog
-│   └── Security
-│       ├── OAuth 2.0 / OIDC
-│       ├── JWT
-│       ├── SSL/TLS
-│       ├── Vault
-│       └── Security Scanning
-└── Soft Skills
-    ├── Problem Solver
-    ├── Fast Learner
-    ├── Team collaboration
-    ├── System design
-    ├── Architecture planning
-    └── Technical mentoring`
+                content: `SKILL MATRIX
+============
+
+LANGUAGES
+  Java          [####################] EXPERT
+  Go            [###############-----] ADVANCED
+  TypeScript    [###############-----] ADVANCED
+  SQL           [###############-----] ADVANCED
+  Python        [##########----------] INTERMEDIATE
+
+  Java ........ Spring Boot, Quarkus, Spring Security, JUnit
+  Go .......... Gin, Echo, Chi, go-restful
+  TypeScript .. NestJS, Express, Fastify
+  Python ...... FastAPI, Django, Flask
+
+DATA
+  Databases ... PostgreSQL, MySQL, Oracle, MongoDB, Cassandra
+  Caching ..... Redis, Memcached, Hazelcast, Caffeine
+  Search ...... Elasticsearch, Solr, OpenSearch
+  Streaming ... Kafka, RabbitMQ, Kinesis, SQS, Redis Pub/Sub
+
+CLOUD
+  AWS           [####################] PRIMARY
+  GCP           [###############-----] PRODUCTION
+  Azure         [##########----------] WORKING
+
+  AWS ......... EC2, ECS, EKS, RDS, S3, Lambda, SQS/SNS, IAM
+  GCP ......... GKE, Cloud Run, Cloud SQL, Pub/Sub, Firestore
+  Azure ....... AKS, App Service, Cosmos DB, Service Bus
+
+PLATFORM
+  Containers .. Docker, Kubernetes, Nomad
+  IaC ......... Terraform, Ansible, CloudFormation
+  CI/CD ....... GitHub Actions, GitLab CI, Jenkins, Azure DevOps
+  Monitoring .. Prometheus, Grafana, ELK, Jaeger, Datadog
+  Security .... OAuth2/OIDC, JWT, TLS, Vault
+  Patterns .... Service mesh, circuit breakers, service discovery
+
+ALSO
+  System design, architecture review, mentoring, and writing
+  the postmortem nobody else wants to write.
+
+Bars show depth, not years. Everything listed here has shipped
+to production at least once.`
               },
               'education.txt': {
                 type: 'file',
@@ -417,7 +339,7 @@ GitHub: github.com/rizesky`
                 },
                 'profile.txt': {
                   type: 'file',
-                  content: `👨‍💻 RIZESKY - SOFTWARE ENGINEER
+                  content: `RIZESKY - SOFTWARE ENGINEER
 ═══════════════════════════════════════
 
     ██████╗ ██╗███████╗███████╗███████╗██╗  ██╗██╗   ██╗
@@ -428,14 +350,14 @@ GitHub: github.com/rizesky`
     ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝   ╚═╝   
 
 ═══════════════════════════════════════
-🎯 Backend Engineer | Software Engineer
-🚀 7 years of experience
-💻 Java, Go, TypeScript, Python
-☁️  AWS, GCP, Azure
-🔧 Microservices, DevOps, Kubernetes
+ROLE ..... Backend / Software Engineer
+EXP ...... 7 years
+LANGS .... Java, Go, TypeScript, Python
+CLOUD .... AWS, GCP, Azure
+INFRA .... Microservices, DevOps, Kubernetes
 
 ═══════════════════════════════════════
-"Building robust systems that scale" 🛠️
+"Building robust systems that scale"
 ═══════════════════════════════════════`
                 },
           '.bashrc': {
@@ -474,8 +396,9 @@ echo "Type 'help' for available commands"`
       return { error: `ls: '${path}': Not a directory` };
     }
     
-    const files = Object.keys(node.children || {});
-    return { files };
+    const entries = Object.entries(node.children || {})
+      .map(([name, child]) => ({ name, type: child.type }));
+    return { files: entries.map(e => e.name), entries };
   }
 
   cd(path) {
@@ -534,54 +457,36 @@ echo "Type 'help' for available commands"`
   }
 
   resolvePath(path) {
-    if (path.startsWith('/')) {
-      return path;
-    }
-    
-    if (path === '..') {
-      const parts = this.currentPath.split('/').filter(p => p);
-      if (parts.length <= 2) { // /home/visitor
-        return '/home/visitor';
+    const base = path.startsWith('/') ? '' : this.currentPath;
+    const segments = (base + '/' + path).split('/').filter(p => p && p !== '.');
+    const resolved = [];
+    for (const segment of segments) {
+      if (segment === '..') {
+        resolved.pop();
+      } else {
+        resolved.push(segment);
       }
-      parts.pop();
-      return '/' + parts.join('/');
     }
-    
-    if (path === '.') {
-      return this.currentPath;
-    }
-    
-    return this.currentPath + '/' + path;
+    return '/' + resolved.join('/');
   }
 
   getNode(path) {
-    // Handle absolute paths starting with /home/visitor
-    if (path.startsWith('/home/visitor')) {
-      const relativePath = path.substring('/home/visitor'.length);
-      const parts = relativePath.split('/').filter(p => p);
-      let current = this.fs['/home/visitor'];
-      
-      for (const part of parts) {
-        if (!current.children || !current.children[part]) {
-          return null;
-        }
-        current = current.children[part];
-      }
-      
-      return current;
+    const root = '/home/visitor';
+    if (path !== root && !path.startsWith(root + '/')) {
+      return null;
     }
-    
-    // Handle relative paths
-    const parts = path.split('/').filter(p => p);
-    let current = this.fs['/home/visitor'];
-    
+
+    const relativePath = path.substring(root.length);
+    const parts = relativePath.split('/').filter(p => p);
+    let current = this.fs[root];
+
     for (const part of parts) {
       if (!current.children || !current.children[part]) {
         return null;
       }
       current = current.children[part];
     }
-    
+
     return current;
   }
 

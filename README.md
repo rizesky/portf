@@ -1,6 +1,6 @@
 # PortoOS
 
-A retro OS-themed personal portfolio, presented as a fake desktop with a working terminal. Built with vanilla JavaScript, NES.css, and a CRT aesthetic.
+A retro OS-themed personal portfolio, presented as a fake desktop with a working terminal. Built with vanilla JavaScript and a CRT aesthetic.
 
 Type `help` to see what's possible.
 
@@ -15,18 +15,20 @@ python3 -m http.server 8000
 
 ## Commands
 
-**Filesystem:** `ls`, `cd`, `pwd`, `cat`, `tree`, `grep`, `find`, `download`
+**Filesystem:** `ls` (`-a` for dotfiles), `cd`, `pwd`, `cat`, `tree`, `grep`, `find`, `download`
 **System:** `whoami`, `date`, `ps`, `uname`, `history`, `man`
-**Utilities:** `echo`, `clear`, `help`, `warnings`, `theme`
+**Utilities:** `echo`, `clear`, `help`, `warnings`, `theme`, `open`
 
-**Aliases:** `about`, `skills`, `projects`, `contact`, `experience`, `education`, `profile`
+**Aliases:** `about`, `skills`, `projects`, `contact`, `experience`, `education`, `profile`, `ll`
 
 **Tips:**
 - `TAB` autocompletes commands and paths
+- Commands accept any casing (`LS` works too); paths stay case-sensitive
 - `↑` / `↓` navigate command history (persisted across reloads)
 - Click desktop icons for quick actions
 - `theme matrix` or `theme amber` for different vibes (persisted)
-- `grep <pattern>` to search file contents, `find -name "*.txt"` to find files
+- `grep "multi word pattern"` to search file contents, `find -name "*.txt"` to find files
+- `open github` / `open linkedin` / `open email` jump straight to my links
 - `download about/experience.txt` saves the file to your machine
 - Drag the terminal to a screen edge to snap it (Win-style)
 - Press a key to skip the boot sequence or the `cat` type-out
@@ -36,7 +38,7 @@ python3 -m http.server 8000
 ## Stack
 
 - Vanilla JS / CSS / HTML — no build, no framework
-- [NES.css](https://nostalgic-css.github.io/NES.css/) for chrome
+- Win9x-style chrome drawn with plain CSS (bevels, taskbar, pixel icons)
 - VT323 + Press Start 2P fonts
 - Canvas background animation
 - CRT scanlines via CSS gradients

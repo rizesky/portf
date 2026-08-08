@@ -65,11 +65,16 @@ class PortoOSApp {
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
-      initialX = this.terminalElement.offsetLeft;
-      initialY = this.terminalElement.offsetTop;
-      
-      document.body.style.cursor = 'move';
+
+      // Pin position before clearing the transform; offsetLeft/Top ignore transforms.
+      const rect = this.terminalElement.getBoundingClientRect();
+      this.terminalElement.style.left = rect.left + 'px';
+      this.terminalElement.style.top = rect.top + 'px';
       this.terminalElement.style.transform = 'none';
+      initialX = rect.left;
+      initialY = rect.top;
+
+      document.body.style.cursor = 'move';
       e.preventDefault();
     });
     
@@ -137,11 +142,11 @@ class PortoOSApp {
 
   toggleMaximize() {
     if (this.isMaximized) {
-      // Restore
-      this.terminalElement.style.width = '95vw';
+      // Must match .terminal-window defaults in main.css
+      this.terminalElement.style.width = 'min(1200px, calc(100vw - 140px))';
       this.terminalElement.style.height = '80vh';
       this.terminalElement.style.top = '10vh';
-      this.terminalElement.style.left = '2.5vw';
+      this.terminalElement.style.left = '120px';
       this.isMaximized = false;
     } else {
       // Maximize
@@ -185,11 +190,11 @@ class PortoOSApp {
     const actions = {
       profile: 'profile',
       terminal: null, // just focus
-      projects: 'tree projects/',
-      resume: 'cat about/experience.txt'
+      projects: 'tree /home/visitor/projects',
+      resume: 'cat /home/visitor/about/experience.txt'
     };
     document.querySelectorAll('.desktop-icons .icon').forEach(icon => {
-      icon.addEventListener('click', () => {
+      const activate = () => {
         const action = icon.dataset.action;
         if (this.isTerminalMinimized) this.toggleTerminal();
         const cmd = actions[action];
@@ -197,6 +202,13 @@ class PortoOSApp {
           this.terminal.runCommand(cmd);
         } else if (this.terminal && this.terminal.focusInput) {
           this.terminal.focusInput();
+        }
+      };
+      icon.addEventListener('click', activate);
+      icon.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          activate();
         }
       });
     });
@@ -314,7 +326,9 @@ class PortoOSApp {
   }
 
   closeTerminal() {
-    // Closing terminal is illegal
+    // Lock now: the sequence itself starts after a delay.
+    if (this.terminal && this.terminal.lockSystem) this.terminal.lockSystem();
+
     // Make sure terminal is visible before nuking
     if (this.isTerminalMinimized) {
       this.toggleTerminal(); // Show terminal first

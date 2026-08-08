@@ -6,6 +6,8 @@ class PortoOSTerminal {
     this.currentLine = '';
     this.history = this.loadHistory();
     this.historyIndex = -1;
+    this.draftLine = '';
+    this.isLocked = false;
     this.isInitialized = false;
     
     this.outputElement = document.getElementById('terminal-output');
@@ -29,29 +31,32 @@ class PortoOSTerminal {
   setupClickHandler() {
     const terminalBody = document.querySelector('.terminal-body');
     if (terminalBody) {
-      terminalBody.addEventListener('click', () => {
-        if (this.inputElement) {
-          this.inputElement.focus();
-        }
-      });
+      terminalBody.addEventListener('click', () => this.focusInput());
     }
   }
 
   showBootSequence() {
     const bootMessages = [
-      'PortoOS v1.0.0 - My terminal portfolio',
-      '===========================',
-      'Loading portoOS modules...',
-      'Mounting imaginary drives...',
-      'Starting pretend services...',
-      'Initializing terminal emulator...',
-      'System ready!',
+      'PortoOS release 1.0 (kernel 5.4.0-portoos) tty1',
       '',
-      '(press any key to skip)'
+      '[    0.000000] Booting PortoOS x86_64 ...',
+      '[    0.184213] Mounting /home/visitor ......... [  OK  ]',
+      '[    0.392847] Starting drive daemon .......... [  OK  ]',
+      '[    0.618294] Starting pretend services ...... [  OK  ]',
+      '[    0.847162] Starting terminal emulator ..... [  OK  ]',
+      '[    1.129483] Reached target multi-user ...... [  OK  ]',
+      '',
+      'portoos login: visitor'
     ];
 
     this.bootSkipped = false;
     this.bootTimers = [];
+
+    // Login starts on a fresh screen, which also drops the skip hint.
+    const finish = () => {
+      this.clearTerminal();
+      this.showWelcome();
+    };
 
     const skip = () => {
       if (this.bootSkipped) return;
@@ -61,9 +66,8 @@ class PortoOSTerminal {
       document.removeEventListener('keydown', skip);
       document.removeEventListener('click', skip);
       this.clearTerminal();
-      bootMessages.slice(0, -2).forEach(m => this.addOutput(m));
-      this.addOutput('');
-      this.showWelcome();
+      bootMessages.forEach(m => this.addOutput(m));
+      finish();
     };
     document.addEventListener('keydown', skip);
     document.addEventListener('click', skip);
@@ -72,36 +76,44 @@ class PortoOSTerminal {
       const t = setTimeout(() => {
         if (this.bootSkipped) return;
         this.addOutput(message);
+        if (index === 0) this.addOutput('(press any key to skip)', 'boot-hint');
         if (index === bootMessages.length - 1) {
           document.removeEventListener('keydown', skip);
           document.removeEventListener('click', skip);
-          this.addOutput('');
-          this.showWelcome();
+          finish();
         }
-      }, index * 350);
+      }, index * 190);
       this.bootTimers.push(t);
     });
   }
 
   showWelcome() {
-    this.addOutput('Welcome to PortoOS!');
+    this.addOutput(`Last login: ${this.lastLoginStamp()} from 10.0.0.42`);
+    this.addOutput('Welcome to PortoOS 1.0 (GNU/Linux 5.4.0-portoos x86_64)');
     this.addOutput('');
-    this.addOutput('This is Rizesky\'s Interactive Portfolio Terminal.');
-    this.addOutput('Explore my work using terminal commands like \'ls\', \'cd\', \'cat\', and \'tree\'.');
-    this.addOutput('Type \'profile\' to see my ASCII art profile!');
+    this.addOutput('  System load ..... 0.04       Processes ......... 128');
+    this.addOutput('  Memory usage .... 38%        Users logged in ... 1');
+    this.addOutput('  Uptime .......... 7 years    Coffee ............ critical');
     this.addOutput('');
-    this.addOutput('💡 TIP: Press TAB for autocompletion of commands and files!');
-    this.addOutput('🌳 TIP: Use \'tree\' command to see directory structures in a tree view!');
+    this.addOutput('7 years of backend work, mounted as a filesystem.');
     this.addOutput('');
-    this.addOutput('⚠️  WARNING: This system is protected!');
-    this.addOutput('   Illegal actions will result in immediate system lockdown.');
-    this.addOutput('   Type \'warnings\' to see what actions are prohibited.');
+    this.addOutput('  about      the short version       help       every command');
+    this.addOutput('  projects   what I have shipped     warnings   do not test these');
     this.addOutput('');
-    
-    // Show help automatically after a short delay
-    setTimeout(() => {
-      this.showHelp();
-    }, 1000);
+    this.addOutput('Tab completes paths, Up/Down recalls history.');
+
+    // Printing the full reference here would push the banner off screen.
+    setTimeout(() => this.addPrompt(), 300);
+  }
+
+  // "Wed Aug  6 09:14:22 2026", the format real login(1) prints
+  lastLoginStamp() {
+    const d = new Date(Date.now() - 86400000);
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const pad = n => String(n).padStart(2, '0');
+    return `${days[d.getDay()]} ${months[d.getMonth()]} ${String(d.getDate()).padStart(2, ' ')} ` +
+           `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${d.getFullYear()}`;
   }
 
   showHelp() {
@@ -175,7 +187,7 @@ class PortoOSTerminal {
     this.outputElement.scrollTop = this.outputElement.scrollHeight;
     
     // Focus the input
-    setTimeout(() => this.inputElement.focus(), 10);
+    setTimeout(() => this.focusInput(), 10);
   }
 
   createInputField() {
@@ -185,6 +197,7 @@ class PortoOSTerminal {
     input.type = 'text';
     input.autocomplete = 'off';
     input.spellcheck = false;
+    input.setAttribute('aria-label', 'Terminal command input');
     
     this.inputElement = input;
     this.setupInputHandling();
@@ -199,10 +212,10 @@ class PortoOSTerminal {
         this.executeCommand();
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        this.navigateHistory(-1);
+        this.navigateHistory(1);
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        this.navigateHistory(1);
+        this.navigateHistory(-1);
       } else if (e.key === 'Tab') {
         e.preventDefault();
         this.autocomplete();
@@ -222,6 +235,7 @@ class PortoOSTerminal {
   }
 
   executeCommand() {
+    if (this.isLocked) return;
     if (!this.currentLine.trim()) {
       this.addPrompt();
       this.inputElement.value = '';
@@ -231,6 +245,7 @@ class PortoOSTerminal {
     // Add to history
     this.history.unshift(this.currentLine);
     this.historyIndex = -1;
+    this.draftLine = '';
     this.saveHistory();
 
     // Process command
@@ -262,86 +277,47 @@ class PortoOSTerminal {
     this.outputElement.scrollTop = this.outputElement.scrollHeight;
   }
 
+  // Newest-first: +1 = older, -1 = newer; index -1 is the draft line.
   navigateHistory(direction) {
     if (this.history.length === 0) return;
 
-    this.historyIndex += direction;
-
-    if (this.historyIndex < 0) {
-      this.historyIndex = -1;
-      this.inputElement.value = '';
-      this.currentLine = '';
-    } else if (this.historyIndex >= this.history.length) {
-      this.historyIndex = this.history.length - 1;
-    } else {
-      this.inputElement.value = this.history[this.historyIndex];
-      this.currentLine = this.history[this.historyIndex];
+    if (this.historyIndex === -1 && direction === 1) {
+      this.draftLine = this.currentLine;
     }
+
+    const next = this.historyIndex + direction;
+    if (next < -1 || next >= this.history.length) return;
+
+    this.historyIndex = next;
+    const value = next === -1 ? (this.draftLine || '') : this.history[next];
+    this.inputElement.value = value;
+    this.currentLine = value;
     this.resizeInput();
   }
 
   autocomplete() {
     if (!this.inputElement) return;
-    
+
     const rawInput = this.inputElement.value || '';
-    
-    if (this.tryCatAutocomplete(rawInput)) {
-      return;
-    }
-    
-    this.handleGeneralAutocomplete(rawInput);
-  }
-  
-  tryCatAutocomplete(rawInput) {
-    const input = rawInput.trimStart();
-    
-    if (!input.toLowerCase().startsWith('cat ')) {
-      return false;
-    }
-    
-    const partialPath = input.slice(4).trimStart();
-    const completions = this.getPathCompletions(partialPath);
-    
-    if (completions.length === 0) {
-      return true;
-    }
-    
-    if (completions.length === 1) {
-      const newValue = `cat ${completions[0]}`;
-      this.inputElement.value = newValue;
-      this.currentLine = newValue;
-      this.resizeInput();
-    } else {
-      const displayMatches = completions.slice(0, 5);
-      this.addOutput(`Possible completions: ${displayMatches.join(' ')}${completions.length > 5 ? '...' : ''}`);
-    }
-    
-    return true;
-  }
-  
-  handleGeneralAutocomplete(rawInput) {
-    if (!this.inputElement) return;
-    
-    const commands = ['ls', 'cd', 'cat', 'pwd', 'whoami', 'date', 'ps', 'uname', 'echo', 'clear', 'help', 'warnings', 'tree', 'history', 'man', 'theme', 'grep', 'find'];
-    const aliases = ['about', 'skills', 'projects', 'contact', 'experience', 'experiences', 'education', '..'];
+    const commands = this.commandProcessor.knownCommands();
     const trimmedLeading = rawInput.replace(/^\s+/, '');
     const hasTrailingSpace = rawInput.endsWith(' ');
-    
+
     if (!trimmedLeading) {
-      this.showCompletionOptions([...commands, ...aliases]);
+      this.showCompletionOptions(commands);
       return;
     }
-    
+
     const tokens = trimmedLeading.split(/\s+/);
     const isCommandContext = tokens.length === 1 && !hasTrailingSpace;
-    
+
     if (isCommandContext) {
       const partial = tokens[0];
       const preservedPrefix = rawInput.slice(0, rawInput.length - partial.length);
-      this.completeFromOptions([...commands, ...aliases], preservedPrefix, partial);
+      this.completeFromOptions(commands, preservedPrefix, partial);
       return;
     }
-    
+
     const partialPath = hasTrailingSpace ? '' : tokens[tokens.length - 1];
     const baseInput = rawInput.slice(0, rawInput.length - partialPath.length);
     this.completePathContext(baseInput, partialPath);
@@ -413,13 +389,15 @@ class PortoOSTerminal {
     
     const options = listing.files || [];
     const lowerPrefix = filePrefix.toLowerCase();
-    
-    const matches = options.filter(option => 
-      option.toLowerCase().startsWith(lowerPrefix) && option.toLowerCase() !== lowerPrefix
+
+    // Dotfiles only complete when the prefix asks for them.
+    const matches = options.filter(option =>
+      option.toLowerCase().startsWith(lowerPrefix) &&
+      (!option.startsWith('.') || filePrefix.startsWith('.'))
     );
-    
+
     const uniqueMatches = [...new Set(matches)];
-    
+
     return uniqueMatches.map(option => this.buildCompletionPath(dirPart, option));
   }
   
@@ -517,7 +495,7 @@ class PortoOSTerminal {
   }
 
   runCommand(text) {
-    if (!text) return;
+    if (!text || this.isLocked) return;
     if (this.inputElement) {
       this.inputElement.value = text;
       this.resizeInput();
@@ -533,21 +511,41 @@ class PortoOSTerminal {
   }
 
   focusInput() {
-    if (this.inputElement) {
+    if (this.inputElement && !this.isLocked) {
       this.inputElement.focus();
     }
   }
 
+  // Capture phase, so nothing downstream responds. Wheel stays live for scrolling.
+  lockSystem() {
+    if (this.isLocked) return;
+    this.isLocked = true;
+
+    if (this.inputElement) {
+      this.inputElement.disabled = true;
+      this.inputElement.placeholder = 'TERMINAL LOCKED - ACCESS DENIED';
+      this.inputElement.blur();
+    }
+
+    const swallow = (e) => {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    };
+    ['keydown', 'keypress', 'keyup', 'mousedown', 'mouseup', 'click', 'dblclick', 'touchstart']
+      .forEach(type => document.addEventListener(type, swallow, true));
+  }
+
   nukeSystem(reason) {
+    this.lockSystem();
     this.clearTerminal();
     
     // Show system admin destruction in terminal
-    this.addOutput('🚨 SECURITY BREACH DETECTED 🚨');
-    this.addOutput('================================');
-    this.addOutput(`Reason: ${reason}`);
+    this.addOutput('*** SECURITY BREACH DETECTED ***');
     this.addOutput('');
-    this.addOutput('System Administrator has been notified.');
-    this.addOutput('Initiating emergency lockdown sequence...');
+    this.addOutput(`Cause: ${reason}`);
+    this.addOutput('');
+    this.addOutput('System administrator has been notified.');
+    this.addOutput('Initiating emergency lockdown sequence ...');
     this.addOutput('');
     
     // Start the system admin destruction sequence
@@ -572,20 +570,13 @@ class PortoOSTerminal {
         // After all commands, start destructive animation
         setTimeout(() => {
           this.addOutput('');
-          this.addOutput('💀 SYSTEM TERMINATED 💀');
-          this.addOutput('This terminal session has been permanently locked.');
-          this.addOutput('All user data has been purged from the system.');
+          this.addOutput('*** Session terminated ***');
+          this.addOutput('Session permanently locked.');
+          this.addOutput('All user data purged.');
           this.addOutput('');
-          this.addOutput('Access denied. Goodbye.');
+          this.addOutput('Access denied.');
           
-          // Start destructive animation
           this.startDestructiveAnimation();
-          
-          // Disable input
-          if (this.inputElement) {
-            this.inputElement.disabled = true;
-            this.inputElement.placeholder = 'TERMINAL LOCKED - ACCESS DENIED';
-          }
         }, 1000);
         return;
       }
@@ -643,8 +634,8 @@ class PortoOSTerminal {
       opacity: 0;
       transition: opacity 2s ease-in;
       font-family: 'Press Start 2P', monospace;
-      color: #ff0000;
-      text-shadow: 0 0 10px #ff0000;
+      color: var(--fg-error);
+      text-shadow: 0 0 10px var(--fg-error);
     `;
     
     // Add destruction text
@@ -655,9 +646,9 @@ class PortoOSTerminal {
       margin-bottom: 30px;
     `;
     destructionText.innerHTML = `
-      <div>💥 SYSTEM DESTRUCTION 💥</div>
+      <div>*** SYSTEM HALTED ***</div>
       <div style="font-size: 16px; margin-top: 20px;">TERMINAL DESTROYED</div>
-      <div style="font-size: 12px; margin-top: 10px; color: #666;">DESKTOP DESTROYED</div>
+      <div style="font-size: 12px; margin-top: 10px; color: var(--fg-dim);">DESKTOP DESTROYED</div>
     `;
     
     // Add console for destruction sequence
@@ -670,9 +661,9 @@ class PortoOSTerminal {
       width: 90%;
       height: 300px;
       overflow-y: auto;
-      background: #111;
+      background: var(--bg-terminal);
       padding: 20px;
-      border: 1px solid #333;
+      border: 1px solid var(--fg-muted);
       border-radius: 4px;
     `;
     
@@ -717,18 +708,17 @@ class PortoOSTerminal {
 
   startDestructionSequence(consoleElement) {
     const messages = [
-      '🚨 SYSTEM FAILURE 🚨',
-      '==================',
+      'Kernel panic - not syncing: Attempted to kill init!',
       '',
-      'Terminal destroyed...',
-      'Desktop corrupted...',
-      'System terminated...',
+      'terminal.service ....... destroyed',
+      'desktop shell .......... corrupted',
+      '/home/visitor .......... unmounted',
+      'session ................ purged',
       '',
-      '💀 DESTROYED 💀',
-      '==============',
-      'All systems offline.',
+      '*** All systems offline ***',
       '',
-      'Goodbye.'
+      'Connection to portoos closed by remote host.',
+      ''
     ];
 
     let messageIndex = 0;
@@ -751,12 +741,12 @@ class PortoOSTerminal {
 
       if (charIndex < messages[messageIndex].length) {
         currentMessage += messages[messageIndex][charIndex];
-        consoleElement.innerHTML = currentMessage.replace(/\n/g, '<br>') + '<span style="color: #ff0000; animation: flicker 0.5s infinite;">█</span>';
+        consoleElement.innerHTML = currentMessage.replace(/\n/g, '<br>') + '<span style="color: var(--fg-error); animation: flicker 0.5s infinite;">█</span>';
         charIndex++;
         setTimeout(typeNextChar, 10 + Math.random() * 20); // Super fast typing
       } else {
         currentMessage += '\n';
-        consoleElement.innerHTML = currentMessage.replace(/\n/g, '<br>') + '<span style="color: #ff0000; animation: flicker 0.5s infinite;">█</span>';
+        consoleElement.innerHTML = currentMessage.replace(/\n/g, '<br>') + '<span style="color: var(--fg-error); animation: flicker 0.5s infinite;">█</span>';
         messageIndex++;
         charIndex = 0;
         setTimeout(typeNextChar, 20 + Math.random() * 50); // Very short pause between messages

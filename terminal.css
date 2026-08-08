@@ -108,16 +108,23 @@
   white-space: pre;
 }
 
+/* Blank spacer lines must still occupy a row */
+.terminal-line:empty::before {
+  content: "\00a0";
+}
+
 .terminal-line.ascii-art {
   font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
   font-size: 12px;
   line-height: 1.1;
-  color: #cbb5ff;
-  text-shadow: 0 0 6px rgba(200, 155, 255, 0.5);
+  color: var(--fg-accent);
+  text-shadow: 0 0 6px var(--glow-soft);
   letter-spacing: 0;
 }
 
-.user, .path { color: var(--fg-primary); }
+.terminal-line.boot-hint {
+  color: var(--fg-dim);
+}
 
 .terminal-line.error {
   color: var(--fg-error);
@@ -144,10 +151,6 @@
   word-break: break-all;
 }
 
-.terminal-input-inline {
-  max-width: 100%;
-}
-
 .user {
   color: var(--fg-accent);
   font-weight: bold;
@@ -166,18 +169,19 @@
   font-size: 20px;
   display: inline;
   width: auto;
+  max-width: 100%;
   caret-color: var(--fg-primary);
   text-shadow: 0 0 1px var(--glow-soft);
 }
 
 /* Root command styling */
 .terminal-line.root {
-  color: #ff0000;
-  text-shadow: 0 0 5px #ff0000;
+  color: var(--fg-error);
+  text-shadow: 0 0 5px var(--fg-error);
 }
 
 .terminal-input-inline::placeholder {
-  color: #666;
+  color: var(--fg-dim);
 }
 
 /* Scrollbar styling */
@@ -186,7 +190,7 @@
 }
 
 .terminal-output::-webkit-scrollbar-track {
-  background: #222;
+  background: var(--bg-chrome);
 }
 
 .terminal-output::-webkit-scrollbar-thumb {
@@ -195,5 +199,5 @@
 }
 
 .terminal-output::-webkit-scrollbar-thumb:hover {
-  background: #9333ea;
+  background: var(--fg-muted);
 }

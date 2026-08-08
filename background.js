@@ -6,7 +6,8 @@ class BackgroundAnimation {
     this.meteors = [];
     this.animationId = null;
     this.time = 0;
-    
+    this.palette = this.readPalette();
+
     this.init();
   }
 
@@ -15,8 +16,22 @@ class BackgroundAnimation {
     this.createStars();
     this.createMeteors();
     this.animate();
-    
+
     window.addEventListener('resize', () => this.handleResize());
+
+    new MutationObserver(() => { this.palette = this.readPalette(); })
+      .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+
+  readPalette() {
+    const styles = getComputedStyle(document.documentElement);
+    const get = (name, fallback) => (styles.getPropertyValue(name) || fallback).trim();
+    return {
+      bg0: get('--canvas-bg-0', '#0a0a1a'),
+      bg1: get('--canvas-bg-1', '#0f0f23'),
+      bg2: get('--canvas-bg-2', '#1a1a2e'),
+      particle: get('--particle', '157, 78, 221')
+    };
   }
 
   resize() {
@@ -67,9 +82,9 @@ class BackgroundAnimation {
       this.canvas.width / 2, this.canvas.height / 2, 0,
       this.canvas.width / 2, this.canvas.height / 2, Math.max(this.canvas.width, this.canvas.height) / 2
     );
-    gradient.addColorStop(0, '#0a0a1a');
-    gradient.addColorStop(0.5, '#0f0f23');
-    gradient.addColorStop(1, '#1a1a2e');
+    gradient.addColorStop(0, this.palette.bg0);
+    gradient.addColorStop(0.5, this.palette.bg1);
+    gradient.addColorStop(1, this.palette.bg2);
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
@@ -83,19 +98,19 @@ class BackgroundAnimation {
       
       star.trail.forEach((point, index) => {
         const trailAlpha = (index / star.trail.length) * 0.3;
-        this.ctx.fillStyle = `rgba(157, 78, 221, ${trailAlpha})`;
+        this.ctx.fillStyle = `rgba(${this.palette.particle}, ${trailAlpha})`;
         this.ctx.fillRect(point.x, point.y, star.size * 0.5, star.size * 0.5);
       });
       
       const twinkleAlpha = (Math.sin(star.twinkle) + 1) / 2;
       const alpha = twinkleAlpha * star.brightness * 0.8 + 0.2;
-      this.ctx.fillStyle = `rgba(157, 78, 221, ${alpha})`;
+      this.ctx.fillStyle = `rgba(${this.palette.particle}, ${alpha})`;
       
       this.ctx.fillRect(star.x - 1, star.y, 3, 1);
       this.ctx.fillRect(star.x, star.y - 1, 1, 3);
       
       if (alpha > 0.7) {
-        this.ctx.fillStyle = `rgba(157, 78, 221, ${alpha * 0.3})`;
+        this.ctx.fillStyle = `rgba(${this.palette.particle}, ${alpha * 0.3})`;
         this.ctx.fillRect(star.x - 2, star.y - 2, 5, 5);
       }
       
@@ -127,11 +142,11 @@ class BackgroundAnimation {
         
         meteor.trail.forEach((point, index) => {
           const trailAlpha = (index / meteor.trail.length) * 0.6;
-          this.ctx.fillStyle = `rgba(157, 78, 221, ${trailAlpha})`;
+          this.ctx.fillStyle = `rgba(${this.palette.particle}, ${trailAlpha})`;
           this.ctx.fillRect(point.x, point.y, meteor.size * 0.8, meteor.size * 0.8);
         });
         
-        this.ctx.fillStyle = `rgba(157, 78, 221, 0.9)`;
+        this.ctx.fillStyle = `rgba(${this.palette.particle}, 0.9)`;
         this.ctx.fillRect(meteor.x, meteor.y, meteor.size, meteor.size);
         
         meteor.x += meteor.speedX;

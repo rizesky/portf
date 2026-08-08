@@ -7,6 +7,8 @@
   --fg-primary: #e9d5ff;
   --fg-accent: #c89bff;
   --fg-muted: #6b3fa0;
+  /* Dimmed text; stays >=4.5:1 on --bg-terminal */
+  --fg-dim: #877a98;
   --fg-error: #ff6b6b;
   --fg-link: #7ee7ff;
   --glow: rgba(200, 155, 255, 0.55);
@@ -15,6 +17,11 @@
   --titlebar-to: #c89bff;
   --bevel-light: rgba(255, 255, 255, 0.5);
   --bevel-dark: rgba(0, 0, 0, 0.6);
+  /* Canvas backdrop (read by background.js) */
+  --canvas-bg-0: #0a0a1a;
+  --canvas-bg-1: #0f0f23;
+  --canvas-bg-2: #1a1a2e;
+  --particle: 157, 78, 221;
 }
 
 :root[data-theme="matrix"] {
@@ -24,6 +31,7 @@
   --fg-primary: #39ff14;
   --fg-accent: #00cc44;
   --fg-muted: #006622;
+  --fg-dim: #1f910e;
   --fg-error: #ff5555;
   --fg-link: #aaffaa;
   --glow: rgba(57, 255, 20, 0.55);
@@ -32,6 +40,10 @@
   --titlebar-to: #00cc44;
   --bevel-light: rgba(170, 255, 170, 0.4);
   --bevel-dark: rgba(0, 0, 0, 0.7);
+  --canvas-bg-0: #000803;
+  --canvas-bg-1: #001008;
+  --canvas-bg-2: #002211;
+  --particle: 57, 255, 20;
 }
 
 :root[data-theme="amber"] {
@@ -41,6 +53,7 @@
   --fg-primary: #ffb000;
   --fg-accent: #ff8800;
   --fg-muted: #663300;
+  --fg-dim: #a87300;
   --fg-error: #ff5544;
   --fg-link: #ffe080;
   --glow: rgba(255, 176, 0, 0.55);
@@ -49,6 +62,10 @@
   --titlebar-to: #ff8800;
   --bevel-light: rgba(255, 224, 128, 0.4);
   --bevel-dark: rgba(0, 0, 0, 0.7);
+  --canvas-bg-0: #120a00;
+  --canvas-bg-1: #1a0f00;
+  --canvas-bg-2: #2a1a00;
+  --particle: 255, 176, 0;
 }
 
 /* Reset and base styles */
@@ -64,12 +81,6 @@ html, body {
   background: var(--bg-deep);
   color: var(--fg-primary);
   font-family: 'Press Start 2P', cursive;
-}
-
-#app {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
 }
 
 /* Desktop Icons */
@@ -90,14 +101,14 @@ html, body {
   .icon-image {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--fg-accent), #7c3aed);
+    background: linear-gradient(135deg, var(--fg-accent), var(--fg-muted));
     margin: 0 auto 8px;
     border: 2px solid var(--fg-accent);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    box-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
+    box-shadow: 0 0 8px var(--glow-soft);
   }
 
 .icon-label {
@@ -108,16 +119,16 @@ html, body {
 
 /* Terminal Window — Win9x bevel chrome */
 .terminal-window {
-  width: 95vw;
-  max-width: 1200px;
+  /* Leave a clear lane on the left so desktop icons are never covered */
+  width: min(1200px, calc(100vw - 140px));
   min-width: 600px;
-  height: 60vh;
+  height: 70vh;
   min-height: 400px;
   position: absolute;
   z-index: 100;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  left: 120px;
+  transform: translateY(-50%);
   background: var(--bg-chrome);
   border: 2px solid;
   border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
@@ -279,7 +290,7 @@ html, body {
     font-family: 'VT323', monospace;
     font-size: 18px;
     cursor: pointer;
-    text-shadow: 0 0 4px rgba(200, 155, 255, 0.55);
+    text-shadow: 0 0 4px var(--glow);
   }
   .mobile-keybar button:active {
     background: var(--fg-primary);

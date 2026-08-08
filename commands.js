@@ -4,19 +4,36 @@ class PortoOSCommandProcessor {
     this.terminal = null; // wired by terminal after construction
           this.aliases = {
             '..': 'cd ..',
-            'about': 'cat about/summary.txt',
-            'skills': 'cat about/skills.txt',
-            'projects': 'tree projects/',
-            'contact': 'cat contact/email.txt',
-            'experience': 'cat about/experience.txt',
-            'experiences': 'cat about/experience.txt',
-            'education': 'cat about/education.txt',
-            'profile': 'cat profile.txt'
+            'about': 'cat /home/visitor/about/summary.txt',
+            'skills': 'cat /home/visitor/about/skills.txt',
+            'projects': 'tree /home/visitor/projects',
+            'contact': 'cat /home/visitor/contact/email.txt',
+            'experience': 'cat /home/visitor/about/experience.txt',
+            'experiences': 'cat /home/visitor/about/experience.txt',
+            'education': 'cat /home/visitor/about/education.txt',
+            'profile': 'cat /home/visitor/profile.txt',
+            'll': 'ls -a'
           };
   }
 
+  tokenize(input) {
+    const tokens = [];
+    const pattern = /"([^"]*)"|'([^']*)'|(\S+)/g;
+    let match;
+    while ((match = pattern.exec(input)) !== null) {
+      tokens.push(match[1] ?? match[2] ?? match[3]);
+    }
+    return tokens;
+  }
+
   processCommand(input) {
-    const [command, ...args] = input.split(' ');
+    const [rawCommand, ...args] = this.tokenize(input);
+    if (!rawCommand) {
+      return { output: '' };
+    }
+
+    // Commands accept any casing; paths stay exact.
+    const command = rawCommand.toLowerCase();
 
     // Check for aliases first
     if (this.aliases[command]) {
@@ -25,7 +42,11 @@ class PortoOSCommandProcessor {
       return this.executeSystemCommand(aliasCmd, [...aliasArgs, ...args]);
     }
 
-    return this.executeSystemCommand(command, args);
+    const result = this.executeSystemCommand(command, args);
+    if (result.error && result.error.startsWith('Command not found:')) {
+      return { error: this.unknownCommandMessage(rawCommand) };
+    }
+    return result;
   }
 
   executeSystemCommand(command, args) {
@@ -71,6 +92,8 @@ class PortoOSCommandProcessor {
       case 'download':
       case 'wget':
         return this.handleDownload(args);
+      case 'open':
+        return this.handleOpen(args);
       case 'sudo':
         return { error: 'visitor is not in the sudoers file. This incident will be reported.' };
       case 'vim':
@@ -94,8 +117,26 @@ class PortoOSCommandProcessor {
   }
 
   knownCommands() {
-    return ['ls','cd','cat','pwd','whoami','date','ps','history','clear','help','uname','echo','warnings','tree','man','theme','grep','find','download','wget',
+    return ['ls','cd','cat','pwd','whoami','date','ps','history','clear','help','uname','echo','warnings','tree','man','theme','grep','find','download','wget','open',
             ...Object.keys(this.aliases)];
+  }
+
+  handleOpen(args) {
+    const targets = {
+      github: 'https://github.com/rizesky',
+      linkedin: 'https://linkedin.com/in/rizesky',
+      email: 'mailto:rizesky.slgn@gmail.com'
+    };
+    const names = Object.keys(targets).join(', ');
+    if (!args[0]) {
+      return { output: `open <target> - open a link in a new tab.\nTargets: ${names}` };
+    }
+    const url = targets[args[0].toLowerCase()];
+    if (!url) {
+      return { error: `open: unknown target '${args[0]}'. Targets: ${names}` };
+    }
+    window.open(url, '_blank', 'noopener');
+    return { output: `Opening ${args[0].toLowerCase()}...` };
   }
 
   handleDownload(args) {
@@ -163,7 +204,7 @@ class PortoOSCommandProcessor {
   }
 
   handleFind(args) {
-    const startPath = args[0]
+    const startPath = (args[0] && !args[0].startsWith('-'))
       ? this.filesystem.resolvePath(args[0])
       : this.filesystem.currentPath;
     const nameIdx = args.indexOf('-name');
@@ -226,6 +267,10 @@ class PortoOSCommandProcessor {
       for (let j = 1; j <= n; j++) {
         const cost = a[i - 1] === b[j - 1] ? 0 : 1;
         dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+        // Transpositions ('sl' -> 'ls') count as one edit
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+          dp[i][j] = Math.min(dp[i][j], dp[i - 2][j - 2] + cost);
+        }
       }
     }
     return dp[m][n];
@@ -244,44 +289,52 @@ class PortoOSCommandProcessor {
   handleMan(args) {
     if (!args[0]) return { error: 'man: missing command name' };
     const pages = {
-      ls: 'ls [dir] — list files in directory.',
-      cd: 'cd [dir] — change directory. Use .. to go up.',
-      cat: 'cat <file> — print file contents. Tab-completes.',
-      pwd: 'pwd — print working directory.',
-      tree: 'tree [dir] — show directory tree.',
-      history: 'history — show previous commands this session.',
-      help: 'help — list available commands.',
-      warnings: 'warnings — show prohibited actions (do not test them).',
-      echo: 'echo <text> — print text.',
-      clear: 'clear — clear the screen.',
-      whoami: 'whoami — print effective user.',
-      date: 'date — current date and time.',
-      uname: 'uname — system identification.',
-      ps: 'ps — list (fake) running processes.',
-      man: 'man <command> — show manual page for command.',
-      theme: 'theme [name] — switch color theme. Available: purple, matrix, amber. Persists across reloads.',
-      grep: 'grep <pattern> [path] — recursively search file contents (case-insensitive regex).',
-      find: 'find [path] -name <glob> — find files matching a name pattern. Supports * and ?.',
-      download: 'download <file> — download a file from the virtual FS to your machine. Alias: wget.',
-      wget: 'wget <file> — alias for download.'
+      ls: 'ls [-a] [dir] - list files in directory. -a includes dotfiles. Directories end with /.',
+      cd: 'cd [dir] - change directory. Use .. to go up.',
+      cat: 'cat <file> - print file contents. Tab-completes.',
+      pwd: 'pwd - print working directory.',
+      tree: 'tree [dir] - show directory tree.',
+      history: 'history - show previous commands this session.',
+      help: 'help - list available commands.',
+      warnings: 'warnings - show prohibited actions (do not test them).',
+      echo: 'echo <text> - print text.',
+      clear: 'clear - clear the screen.',
+      whoami: 'whoami - print effective user.',
+      date: 'date - current date and time.',
+      uname: 'uname - system identification.',
+      ps: 'ps - list (fake) running processes.',
+      man: 'man <command> - show manual page for command.',
+      theme: 'theme [name] - switch color theme. Available: purple, matrix, amber. Persists across reloads.',
+      grep: 'grep <pattern> [path] - recursively search file contents (case-insensitive regex).',
+      find: 'find [path] -name <glob> - find files matching a name pattern. Supports * and ?.',
+      download: 'download <file> - download a file from the virtual FS to your machine. Alias: wget.',
+      wget: 'wget <file> - alias for download.',
+      open: 'open <target> - open a link in a new tab. Targets: github, linkedin, email.',
+      ll: 'll - alias for ls -a.'
     };
-    const page = pages[args[0]];
+    const page = pages[args[0].toLowerCase()];
     return page ? { output: page } : { error: `No manual entry for ${args[0]}` };
   }
 
   handleLs(args) {
-    const result = this.filesystem.ls(args[0]);
+    const flags = args.filter(a => a.startsWith('-'));
+    const showAll = flags.some(f => f.includes('a'));
+    const pathArg = args.find(a => !a.startsWith('-'));
+    const result = this.filesystem.ls(pathArg);
     if (result.error) {
       return { error: result.error };
     }
-    return { output: result.files.join('  ') };
+    const names = result.entries
+      .filter(e => showAll || !e.name.startsWith('.'))
+      .map(e => e.type === 'directory' ? `${e.name}/` : e.name);
+    return { output: names.join('  ') };
   }
 
   handleCd(args) {
-    if (!args[0]) {
-      return { output: '', path: this.filesystem.currentPath };
-    }
     const result = this.filesystem.cd(args[0]);
+    if (result.action) {
+      return result;
+    }
     if (result.error) {
       return { error: result.error };
     }
@@ -296,8 +349,8 @@ class PortoOSCommandProcessor {
     if (result.error) {
       return { error: result.error };
     }
-    // Skip the type-out for ASCII art (looks bad mid-render).
-    const isArt = /[█▓▒░╔╗╚╝═║]/.test(result.content);
+    // Skip the type-out for art and bar charts (both look broken mid-render).
+    const isArt = /[█▓▒░╔╗╚╝═║]/.test(result.content) || /\[[#-]{5,}\]/.test(result.content);
     return { output: result.content, typed: !isArt };
   }
 
@@ -307,77 +360,74 @@ class PortoOSCommandProcessor {
 
   handleHelp() {
     return {
-      output: `PortoOS v1.0.0 - My terminal portfolio
-Available commands:
+      output: `PortoOS 1.0 command reference
 
-File System:
-  ls [dir]           List directory contents
-  cd [dir]           Change directory  
-  pwd                Print working directory
-  cat <file>         Display file contents
-  tree [dir]         Show directory tree structure
-  grep <pat> [path]  Search file contents
-  find [path] -name <glob>   Find files by name
-  download <file>    Download file to your machine
+File system:
+  ls [-a] [dir]              list directory contents (-a shows dotfiles)
+  cd [dir]                   change directory
+  pwd                        print working directory
+  cat <file>                 display file contents
+  tree [dir]                 show directory tree
+  grep <pattern> [path]      search inside files
+  find [path] -name <glob>   find files by name
+  download <file>            save a file to your machine
 
 System:
-  whoami             Show current user
-  date               Show current date/time
-  ps                 Show running processes
-  uname              Show system information
-  history            Show command history
-  man <cmd>          Show manual page
+  whoami                     show current user
+  date                       show date and time
+  ps                         show running processes
+  uname                      show system information
+  history                    show command history
+  man <command>              show manual page
 
 Utilities:
-  echo <text>        Display text
-  clear              Clear terminal screen
-  help               Show this help
-  warnings           Show prohibited actions
-  theme [name]       Switch theme (purple|matrix|amber)
+  echo <text>                print text
+  clear                      clear the screen
+  help                       this reference
+  warnings                   prohibited operations
+  theme [name]               purple | matrix | amber
+  open <target>              github | linkedin | email
 
-Tips:
-  TAB               Autocomplete commands and files
-  ↑/↓ arrows       Navigate command history
+Shortcuts:
+  about  skills  projects  contact  experience  education  profile  ll  ..
 
-Aliases:
-  about              cat about/summary.txt
-  skills             cat about/skills.txt
-  projects           tree projects/
-  contact            cat contact/email.txt
-  experience         cat about/experience.txt
-  experiences        cat about/experience.txt
-  education          cat about/education.txt
-  profile            cat profile.txt
-
-Type any command to get started!`
+Keys:
+  Tab                        complete command or path
+  Up / Down                  recall previous commands`
     };
   }
 
   handleWarnings() {
     return {
-      output: `⚠️  PROHIBITED ACTIONS - SYSTEM PROTECTION ⚠️
-===============================================
+      output: `##########################################################
+#                   AUTHORIZED USE ONLY                  #
+#  All activity on this system is monitored and logged.  #
+##########################################################
 
-🚫 ILLEGAL ACTIONS (Will trigger system lockdown):
-  • Attempting to navigate outside /home/visitor directory
-  • Trying to close the terminal window
-  • Clicking the red close button (X)
-  • Clicking the close button in taskbar
-  • Any unauthorized system access
+Prohibited operations (trigger immediate lockdown):
+  - Navigating outside /home/visitor
+  - Closing the terminal window
+  - Pressing the close button (X)
+  - Pressing close on the taskbar
+  - Any unauthorized system access
 
-💥 CONSEQUENCES:
-  • Immediate system destruction animation
-  • Screen goes black forever
-  • Terminal becomes permanently locked
-  • No recovery possible
+Consequences:
+  - Emergency destruction sequence
+  - Screen goes black. Permanently.
+  - Terminal locked. No recovery.
 
-✅ SAFE ACTIONS:
-  • All file system commands within /home/visitor
-  • Minimizing terminal (yellow button)
-  • Maximizing terminal (green button)
-  • All other available commands
+Permitted:
+  - Any filesystem command inside /home/visitor
+  - Minimizing and maximizing the window
+  - Every other documented command
 
-Stay within bounds to avoid the void! 🕳️`
+We trust you have received the usual lecture from the local
+System Administrator. It usually boils down to these three
+things:
+
+    #1) Respect the privacy of others.
+    #2) Think before you type.
+    #3) With great power comes great responsibility.`
     };
   }
 

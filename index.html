@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#14101f">
     <title>PortoOS — Rizesky's Terminal Portfolio</title>
     <meta name="description" content="An interactive retro-OS portfolio. Explore Rizesky's work through a terminal: type 'help' to begin.">
@@ -23,6 +23,8 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2314101f'/%3E%3Crect x='1' y='1' width='14' height='14' fill='none' stroke='%23c89bff' stroke-width='1'/%3E%3Ctext x='3' y='12' font-family='monospace' font-size='10' fill='%23c89bff'%3E%3E_%3C/text%3E%3C/svg%3E">
     
     <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     
     <!-- Custom styles -->
@@ -36,19 +38,19 @@
     
           <!-- Desktop Icons -->
           <div class="desktop-icons">
-              <div class="icon" data-action="profile">
+              <div class="icon" data-action="profile" role="button" tabindex="0">
                   <div class="icon-image pixel-icon icon-profile" aria-hidden="true"></div>
                   <div class="icon-label">Profile</div>
               </div>
-              <div class="icon" data-action="terminal">
+              <div class="icon" data-action="terminal" role="button" tabindex="0">
                   <div class="icon-image pixel-icon icon-terminal" aria-hidden="true"></div>
                   <div class="icon-label">Terminal</div>
               </div>
-              <div class="icon" data-action="projects">
+              <div class="icon" data-action="projects" role="button" tabindex="0">
                   <div class="icon-image pixel-icon icon-folder" aria-hidden="true"></div>
                   <div class="icon-label">Projects</div>
               </div>
-              <div class="icon" data-action="resume">
+              <div class="icon" data-action="resume" role="button" tabindex="0">
                   <div class="icon-image pixel-icon icon-doc" aria-hidden="true"></div>
                   <div class="icon-label">Resume</div>
               </div>
